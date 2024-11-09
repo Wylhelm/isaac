@@ -5,111 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Scenario Generator</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script>
-        console.log("HTML file loaded");
-    </script>
-    <style>
-        body { 
-            padding-top: 20px;
-            background-color: #f8f9fa;
-            color: #333;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        body.dark-mode {
-            background-color: #333;
-            color: #f8f9fa;
-        }
-        .dark-mode .container-fluid {
-            background-color: #444;
-            color: #f8f9fa;
-        }
-        .dark-mode .form-control {
-            background-color: #555;
-            color: #f8f9fa;
-            border-color: #777;
-        }
-        .dark-mode .btn-secondary {
-            background-color: #666;
-            border-color: #777;
-        }
-        .scenario-history { max-height: 300px; overflow-y: auto; font-size: 0.9em; }
-        #criteria { height: 200px; resize: vertical; overflow-y: auto; }
-        .logo-container {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            margin-bottom: 20px;
-        }
-        .container-fluid {
-            background-color: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .btn {
-            border-radius: 20px;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #0056b3;
-        }
-        .form-control {
-            border-radius: 0;
-        }
-    </style>
+    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
 </head>
 <body>
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-4">
-                <div class="d-flex align-items-center mb-4">
-                    <img src="{{ url_for('static', filename='images/logoIsaaC3.png') }}" alt="ISAAC Logo" class="img-fluid me-3" style="max-height: 100px; cursor: pointer;" id="isaacLogo">
-                    <img src="{{ url_for('static', filename='images/cgi.jpeg') }}" alt="CGI Logo" class="img-fluid" style="max-height: 100px;">
+        <div class="row main-row">
+            <!-- Left Sidebar -->
+            <div class="col-md-3 sidebar">
+                <!-- Logo Section -->
+                <div class="logo-container">
+                    <img src="{{ url_for('static', filename='images/logoIsaaC3.png') }}" alt="ISAAC Logo" class="img-fluid me-2" id="isaacLogo" style="cursor: pointer;">
+                    <img src="{{ url_for('static', filename='images/cgi.jpeg') }}" alt="CGI Logo" class="img-fluid">
                 </div>
-                <h6 class="mb-3 fw-bold">Upload document</h6>
-                <div class="mb-3">
-                    <input type="file" class="form-control" id="fileUpload" multiple accept=".docx,.pdf,.txt,.png,.jpg,.jpeg" disabled>
+
+                <!-- File Upload Section -->
+                <div class="mb-4">
+                    <h6 class="mb-3 fw-bold">Upload document</h6>
+                    <div class="mb-3">
+                        <input type="file" class="form-control" id="fileUpload" multiple accept=".docx,.pdf,.txt,.png,.jpg,.jpeg" disabled>
+                    </div>
+                    <div id="uploadedFilesList">
+                        <h6>Documents list</h6>
+                        <ul id="fileList" class="list-group"></ul>
+                    </div>
                 </div>
-                <div id="uploadedFilesList" class="mb-3">
-                    <h6>Documents list</h6>
-                    <ul id="fileList" class="list-group"></ul>
-                </div>
-                <div class="mb-3">
+
+                <!-- History Section -->
+                <div>
                     <h6 class="fw-bold">History</h6>
                     <div id="scenarioHistory" class="scenario-history"></div>
                     <button id="clearHistoryBtn" class="btn btn-danger btn-sm mt-2">Clear History</button>
                 </div>
             </div>
-            <div class="col-md-8">
-                <div class="mb-3">
-                    <button id="createScenarioBtn" class="btn btn-primary">Create New Scenario</button>
-                    <button id="editSystemPromptBtn" class="btn btn-secondary">Edit System Prompt</button>
-                    <button id="editScenarioPromptBtn" class="btn btn-secondary">Edit Scenario Prompt</button>
-                    <button id="editContextWindowBtn" class="btn btn-secondary">Edit Context Window</button>
-                    <button id="darkModeToggle" class="btn btn-success float-end">Dark Mode</button>
+
+            <!-- Main Content -->
+            <div class="col-md-9 main-content">
+                <!-- Top Button Bar -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button id="createScenarioBtn" class="btn btn-primary">Create New Scenario</button>
+                        <button id="editSystemPromptBtn" class="btn btn-secondary">Edit System Prompt</button>
+                        <button id="editScenarioPromptBtn" class="btn btn-secondary">Edit Scenario Prompt</button>
+                        <button id="editContextWindowBtn" class="btn btn-secondary">Edit Context Window</button>
+                    </div>
+                    <button id="darkModeToggle" class="btn btn-success">Dark Mode</button>
                 </div>
-                <form id="scenarioForm">
+
+                <!-- Scenario Form -->
+                <form id="scenarioForm" class="mb-3">
                     <div class="mb-3">
-                        <label for="scenarioName" class="form-label fw-bold">Scénario name</label>
+                        <label for="scenarioName" class="form-label fw-bold">Scenario name</label>
                         <input type="text" class="form-control" id="scenarioName" required disabled>
                     </div>
+
                     <div class="mb-3 position-relative">
-                        <h6 class="mb-2 fw-bold">Criterias</h6>
-                        <textarea class="form-control" id="criteria" rows="10" required disabled style="resize: vertical;"></textarea>
-                        <div id="criteriaPlaceholder" class="position-absolute top-50 start-50 translate-middle text-muted">To begin, click on Create New Scenario or select one from History</div>
+                        <h6 class="mb-2 fw-bold">Criteria</h6>
+                        <textarea class="form-control" id="criteria" required disabled></textarea>
+                        <div id="criteriaPlaceholder" class="position-absolute top-50 start-50 translate-middle text-muted">
+                            To begin, click on Create New Scenario or select one from History
+                        </div>
                     </div>
+
                     <button type="submit" class="btn btn-success" id="generateButton" disabled>Generate Scenario</button>
                 </form>
-                <div class="mt-4">
+
+                <!-- Generated Scenario Section -->
+                <div class="flex-grow-1 d-flex flex-column">
                     <label for="generatedScenario" class="form-label fw-bold">Generated scenario</label>
-                    <div id="generatedScenario" class="border p-3 mb-3" style="height: 300px; overflow-y: auto; white-space: pre-wrap; font-family: monospace; font-size: 0.825em; resize: vertical;"></div>
-                    <div id="inferenceStats" class="border p-2 mb-3" style="font-size: 0.9em; display: none;"></div>
-                    <div>
-                        <button id="exportScenario" class="btn btn-secondary me-2" disabled>Export Scenario</button>
+                    <div id="generatedScenario" class="flex-grow-1"></div>
+                    <div id="inferenceStats" style="display: none;"></div>
+                    
+                    <div class="d-flex gap-2 mt-2">
+                        <button id="exportScenario" class="btn btn-secondary" disabled>Export Scenario</button>
                         <button id="stopGeneration" class="btn btn-danger" style="display: none;">Stop Generation</button>
                     </div>
                 </div>
@@ -117,571 +84,12 @@
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        let scenarioCounter = 1;
-
-        // Function to toggle the visibility of the criteria placeholder
-        function toggleCriteriaPlaceholder() {
-            const criteria = document.getElementById('criteria');
-            const placeholder = document.getElementById('criteriaPlaceholder');
-            const isFormActive = !document.getElementById('scenarioName').disabled;
-            placeholder.style.display = (criteria.value.trim() === '' && !isFormActive) ? 'block' : 'none';
-        }
-
-        // Show placeholder by default
-        document.addEventListener('DOMContentLoaded', toggleCriteriaPlaceholder);
-
-        document.getElementById('createScenarioBtn').addEventListener('click', () => {
-            // Enable form elements
-            document.getElementById('scenarioName').disabled = false;
-            document.getElementById('criteria').disabled = false;
-            document.getElementById('fileUpload').disabled = false;
-            updateGenerateButton();
-            document.getElementById('fileUpload').disabled = false;
-
-            // Reset form
-            document.getElementById('scenarioForm').reset();
-    
-            // Set a new default name for the scenario
-            document.getElementById('scenarioName').value = `Scenario ${scenarioCounter}`;
-            scenarioCounter++;
-    
-            // Clear the generated scenario and reset the generate button
-            const generateButton = document.getElementById('generateButton');
-            document.getElementById('generatedScenario').textContent = '';
-            document.getElementById('exportScenario').disabled = true;
-            generateButton.textContent = 'Generate Scenario';
-            generateButton.classList.remove('btn-success');
-            generateButton.classList.add('btn-primary');
-
-            // Clear the file list
-            document.getElementById('fileList').innerHTML = '';
-
-            // Hide the criteria placeholder
-            toggleCriteriaPlaceholder();
-
-            // Focus on the scenario name input
-            document.getElementById('scenarioName').focus();
-
-            // Update the generate button state
-            updateGenerateButton();
-
-            // Clear the inference statistics
-            const inferenceStatsDiv = document.getElementById('inferenceStats');
-            inferenceStatsDiv.textContent = '';
-            inferenceStatsDiv.style.display = 'none';
-        });
-
-        // Add event listener to criteria textarea
-        document.getElementById('criteria').addEventListener('input', function() {
-            toggleCriteriaPlaceholder();
-            updateGenerateButton();
-        });
-
-        function updateGenerateButton() {
-            const generateButton = document.getElementById('generateButton');
-            const criteria = document.getElementById('criteria').value.trim();
-            
-            if (criteria === '') {
-                generateButton.disabled = true;
-                generateButton.classList.remove('btn-success');
-                generateButton.classList.add('btn-secondary');
-            } else {
-                generateButton.disabled = false;
-                generateButton.classList.remove('btn-secondary');
-                generateButton.classList.add('btn-success');
-            }
-        }
-
-        // Call updateGenerateButton initially to set the correct state
-        updateGenerateButton();
-
-        // Add event listener to criteria textarea
-        document.getElementById('criteria').addEventListener('input', updateGenerateButton);
-
-        let abortController;
-
-        async function generateScenario(isRegenerate = false) {
-            const name = document.getElementById('scenarioName').value;
-            const criteria = document.getElementById('criteria').value;
-            const uploadedFiles = Array.from(document.getElementById('fileList').children).map(li => li.textContent);
-            const generatedScenarioDiv = document.getElementById('generatedScenario');
-            const inferenceStatsDiv = document.getElementById('inferenceStats');
-            const generateButton = document.getElementById('generateButton');
-            
-            generatedScenarioDiv.textContent = '';
-            inferenceStatsDiv.style.display = 'none';
-            document.getElementById('exportScenario').disabled = true;
-            document.getElementById('stopGeneration').style.display = 'inline-block';
-            generateButton.disabled = true;
-
-            abortController = new AbortController();
-            const signal = abortController.signal;
-
-            try {
-                const response = await fetch('/generate', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({name, criteria, uploaded_files: uploadedFiles, is_regenerate: isRegenerate}),
-                    signal: signal
-                });
-
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-
-                let fullContent = '';
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    const chunk = decoder.decode(value, { stream: true });
-                    fullContent += chunk;
-                
-                    if (fullContent.includes('\n\nInference Statistics:')) {
-                        const [scenarioContent, stats] = fullContent.split('\n\nInference Statistics:');
-                        generatedScenarioDiv.textContent = scenarioContent;
-                        inferenceStatsDiv.textContent = 'Inference Statistics:\n' + stats;
-                        inferenceStatsDiv.style.display = 'block';
-                    } else {
-                        generatedScenarioDiv.textContent = fullContent;
-                    }
-                    generatedScenarioDiv.scrollTop = generatedScenarioDiv.scrollHeight;
-                }
-
-                const exportButton = document.getElementById('exportScenario');
-                exportButton.disabled = false;
-                exportButton.classList.remove('btn-secondary');
-                exportButton.classList.add('btn-success');
-                
-                generateButton.textContent = 'Regenerate Scenario';
-                generateButton.classList.remove('btn-primary');
-                generateButton.classList.add('btn-success');
-                generateButton.disabled = false;
-                
-                if (!isRegenerate) {
-                    loadScenarios();
-                }
-            } catch (error) {
-                if (error.name === 'AbortError') {
-                    generatedScenarioDiv.textContent += '\n\nScenario generation stopped by user.';
-                } else {
-                    console.error('Fetch error:', error);
-                    generatedScenarioDiv.textContent += '\n\nAn error occurred during scenario generation.';
-                }
-            } finally {
-                document.getElementById('stopGeneration').style.display = 'none';
-                generateButton.disabled = false;
-            }
-        }
-
-        document.getElementById('scenarioForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await generateScenario();
-        });
-
-        document.getElementById('generateButton').addEventListener('click', async () => {
-            if (document.getElementById('generateButton').textContent === 'Regenerate Scenario') {
-                await generateScenario(true);
-                await loadScenarios(); // Reload scenarios after regeneration
-            }
-        });
-
-        document.getElementById('stopGeneration').addEventListener('click', () => {
-            if (abortController) {
-                abortController.abort();
-            }
-        });
-
-        document.getElementById('fileUpload').addEventListener('change', async (e) => {
-            const files = e.target.files;
-            const formData = new FormData();
-            const fileList = document.getElementById('fileList');
-            const criteriaTextarea = document.getElementById('criteria');
-    
-            for (let i = 0; i < files.length; i++) {
-                formData.append('files', files[i]);
-                // Add file to the list
-                const li = document.createElement('li');
-                li.className = 'list-group-item';
-                li.textContent = files[i].name;
-                if (files[i].type.startsWith('image/')) {
-                    li.textContent += ' (Analyzing image...)';
-                }
-                fileList.appendChild(li);
-            }
-    
-            const response = await fetch('/upload', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await response.json();
-    
-            // Update file list and criteria textarea
-            let newContent = criteriaTextarea.value;
-            data.results.forEach((result, index) => {
-                const li = fileList.children[fileList.children.length - files.length + index];
-                if (li.textContent.includes('(Analyzing image...)')) {
-                    li.textContent = li.textContent.replace(' (Analyzing image...)', ' (Analysis complete)');
-                }
-                newContent += `\n\nFile: ${result.filename}\n${result.content}`;
-            });
-            criteriaTextarea.value = newContent.trim(); // Remove leading/trailing whitespace
-            
-            // Trigger input event to update placeholder and generate button
-            criteriaTextarea.dispatchEvent(new Event('input'));
-            
-            // Adjust textarea height to fit content
-            // Remove auto-expand functionality
-            
-            // Ensure the full text is visible
-            criteriaTextarea.scrollTop = criteriaTextarea.scrollHeight;
-            
-            toggleCriteriaPlaceholder();
-            updateGenerateButton();
-        });
-
-        document.getElementById('exportScenario').addEventListener('click', () => {
-            const scenario = document.getElementById('generatedScenario').textContent;
-            const scenarioName = document.getElementById('scenarioName').value;
-            const blob = new Blob([scenario], {type: 'text/plain'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${scenarioName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_scenario.txt`;
-            a.click();
-            URL.revokeObjectURL(url);
-        });
-
-        async function loadScenarios() {
-            const response = await fetch('/scenarios');
-            const scenarios = await response.json();
-            const historyDiv = document.getElementById('scenarioHistory');
-            historyDiv.innerHTML = '';
-            scenarios.forEach(s => {
-                const div = document.createElement('div');
-                div.className = 'mb-2 p-2 border rounded cursor-pointer';
-                div.innerHTML = `
-                    <strong>${s.name}</strong>
-                    <p>${s.scenario.substring(0, 100)}...</p>
-                    <small>Files: ${s.uploaded_files || 'None'}</small><br>
-                    <small>${s.statistics || ''}</small>
-                `;
-                div.addEventListener('click', () => {
-                    document.getElementById('scenarioName').value = s.name;
-                    document.getElementById('criteria').value = s.criteria;
-                    document.getElementById('generatedScenario').textContent = s.scenario;
-                    document.getElementById('exportScenario').disabled = false;
-                    document.getElementById('inferenceStats').textContent = s.statistics || '';
-                    document.getElementById('inferenceStats').style.display = s.statistics ? 'block' : 'none';
-                    document.getElementById('fileList').innerHTML = s.uploaded_files ? s.uploaded_files.split(', ').map(file => `<li class="list-group-item">${file}</li>`).join('') : '';
-                    
-                    // Enable form elements
-                    document.getElementById('scenarioName').disabled = false;
-                    document.getElementById('criteria').disabled = false;
-                    document.getElementById('fileUpload').disabled = false;
-                    
-                    // Update generate button
-                    const generateButton = document.getElementById('generateButton');
-                    generateButton.textContent = 'Regenerate Scenario';
-                    generateButton.classList.remove('btn-primary');
-                    generateButton.classList.add('btn-success');
-                    generateButton.disabled = false;
-                    
-                    // Hide the criteria placeholder
-                    document.getElementById('criteriaPlaceholder').style.display = 'none';
-                    
-                    updateGenerateButton();
-                });
-                historyDiv.appendChild(div);
-            });
-        }
-
-        // Load scenarios when the page loads
-        document.addEventListener('DOMContentLoaded', loadScenarios);
-
-        // Load scenarios after generating a new scenario
-        document.getElementById('scenarioForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            // ... existing code ...
-            await loadScenarios(); // Add this line to reload scenarios after generation
-        });
-
-        document.getElementById('editSystemPromptBtn').addEventListener('click', async () => {
-            const response = await fetch('/get_system_prompt');
-            const data = await response.json();
-            
-            // Create a modal dialog
-            const modal = document.createElement('div');
-            modal.style.position = 'fixed';
-            modal.style.left = '0';
-            modal.style.top = '0';
-            modal.style.width = '100%';
-            modal.style.height = '100%';
-            modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
-            modal.style.display = 'flex';
-            modal.style.justifyContent = 'center';
-            modal.style.alignItems = 'center';
-
-            // Create the modal content
-            const modalContent = document.createElement('div');
-            modalContent.style.backgroundColor = 'white';
-            modalContent.style.padding = '20px';
-            modalContent.style.borderRadius = '5px';
-            modalContent.style.width = '80%';
-            modalContent.style.maxWidth = '600px';
-
-            // Create a textarea for editing the prompt
-            const textarea = document.createElement('textarea');
-            textarea.value = data.prompt;
-            textarea.style.width = '100%';
-            textarea.style.height = '200px';
-            textarea.style.marginBottom = '10px';
-
-            // Create save and cancel buttons
-            const saveBtn = document.createElement('button');
-            saveBtn.textContent = 'Save';
-            saveBtn.className = 'btn btn-primary me-2';
-            const cancelBtn = document.createElement('button');
-            cancelBtn.textContent = 'Cancel';
-            cancelBtn.className = 'btn btn-secondary';
-
-            // Add elements to the modal
-            modalContent.appendChild(textarea);
-            modalContent.appendChild(saveBtn);
-            modalContent.appendChild(cancelBtn);
-            modal.appendChild(modalContent);
-
-            // Add the modal to the body
-            document.body.appendChild(modal);
-
-            // Handle save button click
-            saveBtn.addEventListener('click', async () => {
-                const newPrompt = textarea.value;
-                await fetch('/set_system_prompt', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({prompt: newPrompt})
-                });
-                document.body.removeChild(modal);
-                alert('System prompt updated successfully');
-            });
-
-            // Handle cancel button click
-            cancelBtn.addEventListener('click', () => {
-                document.body.removeChild(modal);
-            });
-        });
-
-        document.getElementById('editContextWindowBtn').addEventListener('click', async () => {
-            const response = await fetch('/get_context_window');
-            const data = await response.json();
-            const currentSize = data.size;
-            
-            // Create a modal dialog
-            const modal = document.createElement('div');
-            modal.style.position = 'fixed';
-            modal.style.left = '0';
-            modal.style.top = '0';
-            modal.style.width = '100%';
-            modal.style.height = '100%';
-            modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
-            modal.style.display = 'flex';
-            modal.style.justifyContent = 'center';
-            modal.style.alignItems = 'center';
-
-            // Create the modal content
-            const modalContent = document.createElement('div');
-            modalContent.style.backgroundColor = 'white';
-            modalContent.style.padding = '20px';
-            modalContent.style.borderRadius = '5px';
-            modalContent.style.width = '80%';
-            modalContent.style.maxWidth = '600px';
-
-            // Create a select element for choosing the context window size
-            const select = document.createElement('select');
-            select.id = 'contextWindowSize';
-            select.style.width = '100%';
-            select.style.marginBottom = '10px';
-            select.innerHTML = `
-                <option value="4096" ${currentSize === 4096 ? 'selected' : ''}>4096</option>
-                <option value="8192" ${currentSize === 8192 ? 'selected' : ''}>8192</option>
-            `;
-
-            // Create save and cancel buttons
-            const saveBtn = document.createElement('button');
-            saveBtn.textContent = 'Save';
-            saveBtn.className = 'btn btn-primary me-2';
-            const cancelBtn = document.createElement('button');
-            cancelBtn.textContent = 'Cancel';
-            cancelBtn.className = 'btn btn-secondary';
-
-            // Add elements to the modal
-            modalContent.appendChild(select);
-            modalContent.appendChild(saveBtn);
-            modalContent.appendChild(cancelBtn);
-            modal.appendChild(modalContent);
-
-            // Add the modal to the body
-            document.body.appendChild(modal);
-
-            // Handle save button click
-            saveBtn.addEventListener('click', async () => {
-                const newSize = parseInt(select.value);
-                await fetch('/set_context_window', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({size: newSize})
-                });
-                document.body.removeChild(modal);
-                alert(`Context window size set to ${newSize}`);
-            });
-
-            // Handle cancel button click
-            cancelBtn.addEventListener('click', () => {
-                document.body.removeChild(modal);
-            });
-        });
-
-        document.getElementById('editScenarioPromptBtn').addEventListener('click', async () => {
-            const response = await fetch('/get_scenario_prompt');
-            const data = await response.json();
-            
-            // Create a modal dialog
-            const modal = document.createElement('div');
-            modal.style.position = 'fixed';
-            modal.style.left = '0';
-            modal.style.top = '0';
-            modal.style.width = '100%';
-            modal.style.height = '100%';
-            modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
-            modal.style.display = 'flex';
-            modal.style.justifyContent = 'center';
-            modal.style.alignItems = 'center';
-
-            // Create the modal content
-            const modalContent = document.createElement('div');
-            modalContent.style.backgroundColor = 'white';
-            modalContent.style.padding = '20px';
-            modalContent.style.borderRadius = '5px';
-            modalContent.style.width = '80%';
-            modalContent.style.maxWidth = '600px';
-
-            // Create a textarea for editing the scenario prompt
-            const textarea = document.createElement('textarea');
-            textarea.value = data.prompt;
-            textarea.style.width = '100%';
-            textarea.style.height = '200px';
-            textarea.style.marginBottom = '10px';
-
-            // Create save and cancel buttons
-            const saveBtn = document.createElement('button');
-            saveBtn.textContent = 'Save';
-            saveBtn.className = 'btn btn-primary me-2';
-            const cancelBtn = document.createElement('button');
-            cancelBtn.textContent = 'Cancel';
-            cancelBtn.className = 'btn btn-secondary';
-
-            // Add elements to the modal
-            modalContent.appendChild(textarea);
-            modalContent.appendChild(saveBtn);
-            modalContent.appendChild(cancelBtn);
-            modal.appendChild(modalContent);
-
-            // Add the modal to the body
-            document.body.appendChild(modal);
-
-            // Handle save button click
-            saveBtn.addEventListener('click', async () => {
-                const newPrompt = textarea.value;
-                await fetch('/set_scenario_prompt', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({prompt: newPrompt})
-                });
-                document.body.removeChild(modal);
-                showSaveAlert('Scenario prompt updated successfully');
-            });
-
-            // Handle cancel button click
-            cancelBtn.addEventListener('click', () => {
-                document.body.removeChild(modal);
-            });
-        });
-
-        function showSaveAlert(message) {
-            alert(message || 'Changes saved successfully.');
-        }
-
-        document.getElementById('clearHistoryBtn').addEventListener('click', async () => {
-            if (confirm('Are you sure you want to clear all scenario history? This action cannot be undone.')) {
-                try {
-                    const response = await fetch('/clear_history', { method: 'POST' });
-                    if (response.ok) {
-                        document.getElementById('scenarioHistory').innerHTML = '';
-                        alert('Scenario history has been cleared.');
-                    } else {
-                        alert('Failed to clear scenario history. Please try again.');
-                    }
-                } catch (error) {
-                    console.error('Error clearing history:', error);
-                    alert('An error occurred while clearing the history. Please try again.');
-                }
-            }
-        });
-    </script>
-    <script>
-        function toggleCriteriaPlaceholder() {
-            const criteria = document.getElementById('criteria');
-            const placeholder = document.getElementById('criteriaPlaceholder');
-            const isFormActive = !document.getElementById('scenarioName').disabled;
-            placeholder.style.display = (criteria.value.trim() === '' && !isFormActive) ? 'block' : 'none';
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            toggleCriteriaPlaceholder();
-            document.getElementById('criteria').addEventListener('input', toggleCriteriaPlaceholder);
-        });
-
-        document.getElementById('createScenarioBtn').addEventListener('click', () => {
-            // ... (existing code)
-
-            document.getElementById('scenarioForm').style.display = 'block';
-            document.getElementById('generatedScenario').textContent = '';
-            document.getElementById('exportScenario').disabled = true;
-            document.getElementById('criteria').value = '';
-            toggleCriteriaPlaceholder();
-        });
-
-        // Hide placeholder when form is submitted
-        document.getElementById('scenarioForm').addEventListener('submit', () => {
-            document.getElementById('criteriaPlaceholder').style.display = 'none';
-        });
-    </script>
-    <script>
-        document.getElementById('isaacLogo').addEventListener('click', function() {
-            var videoWindow = window.open('', 'ISAAC Video', 'width=800,height=600');
-            videoWindow.document.write('<html><body style="margin:0; padding:0;">');
-            videoWindow.document.write('<video width="100%" height="100%" controls autoplay>');
-            videoWindow.document.write('<source src="{{ url_for("static", filename="images/isaacvideo.mp4") }}" type="video/mp4">');
-            videoWindow.document.write('Your browser does not support the video tag.');
-            videoWindow.document.write('</video>');
-            videoWindow.document.write('</body></html>');
-            videoWindow.document.close();
-        });
-    </script>
-    <script>
-        document.getElementById('darkModeToggle').addEventListener('click', function() {
-            document.body.classList.toggle('dark-mode');
-            if (document.body.classList.contains('dark-mode')) {
-                this.textContent = 'Light Mode';
-                this.classList.remove('btn-success');
-                this.classList.add('btn-light');
-            } else {
-                this.textContent = 'Dark Mode';
-                this.classList.remove('btn-light');
-                this.classList.add('btn-success');
-            }
-        });
-    </script>
+    <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/scenario.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/fileUpload.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modals.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
