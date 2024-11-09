@@ -18,6 +18,17 @@ The Test Scenario Generator is an AI-powered web application designed to assist 
 - Export generated scenarios
 - Inference statistics display
 
+## Project Structure
+The application is organized into modular components:
+- `app.py` - Main application initialization
+- `config.py` - Configuration management
+- `models.py` - Database models
+- `file_processor.py` - File processing logic
+- `scenario_generator.py` - Test scenario generation
+- `routes.py` - API endpoints and route handlers
+- `templates/` - HTML templates
+- `static/` - Static assets (CSS, JS, images)
+
 ## Installation
 1. Ensure Python 3.7+ is installed on your system.
 2. Clone this repository:
@@ -55,6 +66,10 @@ The Test Scenario Generator is an AI-powered web application designed to assist 
 - python-dotenv
 - Local LLM server (e.g., using LM Studio) accessible at http://localhost:1234
 
+## Documentation
+- `user_guide.md` - Detailed instructions for using the application
+- `developer_guide.md` - Technical documentation and development guidelines
+
 ## Contributing
 Contributions are welcome! Please read the contributing guidelines in `CONTRIBUTING.md` for details on our code of conduct and the process for submitting pull requests.
 
@@ -64,4 +79,6 @@ This project is licensed under the GPL-3.0 license. See the `LICENSE` file for d
 ## Acknowledgments
 - CGI Innovation and Immersive Systems Community
 
-For more information, please refer to the `user_guide.md` for usage instructions and `developer_guide.md` for development details.
+For more detailed information:
+- User Guide: See `user_guide.md` for usage instructions
+- Developer Guide: See `developer_guide.md` for technical details and development guidelines
