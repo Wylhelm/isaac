@@ -1,136 +1,235 @@
-# Test Scenario Generator - Developer Guide
+# Developer Guide
 
-## Project Overview 
-The Test Scenario Generator is a Flask-based web application that leverages AI to analyze documents (Word, PDF, text files, and images) to automatically generate comprehensive test scenarios. It uses a local Large Language Model (LLM) to create scenarios adhering to the IEEE 829 standard.
+## RAG (Retrieval Augmented Generation) Implementation
 
-## Project Structure
-The application is organized into modular components for better maintainability:
+### Overview
+The system uses RAG to enhance scenario generation by leveraging existing documents and historical scenarios. This implementation includes:
 
-- `app.py`: Main application initialization and configuration
-- `config.py`: Configuration management and environment setup
-- `models.py`: Database models and initialization
-- `file_processor.py`: File processing and image analysis logic
-- `scenario_generator.py`: Test scenario generation functionality
-- `routes.py`: Flask route handlers and API endpoints
-- `templates/index.html`: HTML template for the main user interface
-- `static/`: Directory for static files (CSS, JavaScript, images)
-- `.env`: Environment variables file (not in version control)
-- `requirements.txt`: List of Python dependencies
-- `README.md`: Project overview and setup instructions
-- `user_guide.md`: User guide for the application
-- `developer_guide.md`: This file, containing development details
+1. Vector Database Integration
+- Uses Chroma for vector storage
+- HuggingFace embeddings (all-MiniLM-L6-v2 model)
+- Persistent storage in `vector_store/` directory
 
-## Setup and Dependencies
-1. Ensure Python 3.7+ is installed.
-2. Install dependencies: `pip install -r requirements.txt`
-3. Set up a local LLM server (e.g., using LM Studio) accessible at http://localhost:1234.
-4. Create a `.env` file with necessary environment variables (see `.env` section in this guide).
+2. Document Processing Pipeline
+- Chunking with RecursiveCharacterTextSplitter
+- Support for PDF, DOCX, TXT, and image files
+- Metadata preservation and chunk relationships
 
-## Key Components
+3. Enhanced Scenario Generation
+- Context-aware generation using relevant document chunks
+- Semantic search for finding similar scenarios
+- Batch processing capabilities
 
-### Main Application (app.py)
-- Creates and configures the Flask application
-- Initializes database and extensions
-- Registers routes and blueprints
+### Database Schema
 
-### Configuration (config.py)
-- Manages application configuration and environment variables
-- Sets up logging configuration
-- Defines system prompts and default settings
+#### TestScenario Model
+- Added vector embeddings for semantic search
+- Stores embeddings as JSON-serialized numpy arrays
+- Methods for embedding manipulation
 
-### Database Models (models.py)
-- Defines the TestScenario model using SQLAlchemy
-- Handles database initialization and management
-- Provides database utility functions
+#### Document Model
+- Tracks uploaded documents
+- Maintains relationships with chunks
+- Stores metadata about document source
 
-### File Processing (file_processor.py)
-- Processes various file types (DOCX, PDF, TXT, PNG, JPG, JPEG)
-- Implements image analysis using OpenAI's API
-- Handles file uploads and content extraction
+#### DocumentChunk Model
+- Stores processed document chunks
+- Contains vector embeddings for search
+- Links back to source document
 
-### Scenario Generation (scenario_generator.py)
-- Manages communication with local LLM server
-- Handles scenario generation and streaming
-- Provides prompt management functionality
+### Performance Monitoring
 
-### Route Handlers (routes.py)
-- Implements all Flask routes and API endpoints
-- Handles HTTP requests and responses
-- Manages application flow and business logic
+The monitoring system tracks:
 
-### User Interface (templates/index.html)
-- Provides a responsive web interface
-- Implements client-side functionality using JavaScript
-- Handles real-time scenario generation display
+1. Vector Store Performance
+```python
+from monitoring import vector_metrics
 
-## Environment Variables (.env)
-The application uses the following environment variables:
-- `OPENAI_API_KEY`: Your OpenAI API key for image analysis
-- `OPENAI_MODEL`: The OpenAI model to use (default: gpt-4o)
-- `FLASK_SECRET_KEY`: Secret key for Flask sessions
-- `DATABASE_URI`: SQLite database URI
-- `LOCAL_LLM_SERVER_URL`: URL of the local LLM server
-- `DEBUG`: Debug mode flag (True/False)
+# Track query performance
+with vector_metrics.track_query("search query", num_results=5) as ctx:
+    # Perform vector store query
+    results = vector_store.similarity_search(query)
 
-## Workflow
-1. User creates a new scenario with an automatically assigned name.
-2. Documents are uploaded and processed by file_processor.py.
-3. Extracted information is added to the criteria input.
-4. User can modify the criteria if needed.
-5. User can customize system prompt, scenario prompt, and context window size.
-6. scenario_generator.py generates a test scenario using the local LLM server.
-7. Generated scenario is displayed in real-time, with the option to stop generation.
-8. Completed scenario is saved to the database and can be exported.
-9. Inference statistics are displayed after generation.
+# Get performance metrics
+metrics = vector_metrics.get_metrics_summary()
+```
 
-## Extending the Application
-- To add new file types, extend the process_file function in file_processor.py
-- To modify the UI, update the index.html template and associated JavaScript
-- To change the database schema, update the TestScenario model in models.py
-- To add new features, create new routes in routes.py and corresponding UI elements
+2. System Resources
+```python
+from monitoring import monitor
 
-## Best Practices
-- Follow PEP 8 style guidelines for Python code
-- Write unit tests for new features (use unittest or pytest)
-- Document new methods and functions using docstrings
-- Handle exceptions appropriately and provide user-friendly error messages
-- Use environment variables for sensitive information and configuration
-- Implement proper error handling for asynchronous operations
-- Regularly update dependencies and check for security vulnerabilities
+@monitor.track_operation("custom_operation")
+def your_function():
+    # Function implementation
+    pass
 
-## Troubleshooting
-- Ensure the local LLM server is running and accessible at http://localhost:1234
-- Check the server logs for error messages and stack traces
-- Ensure all required dependencies are installed and up to date
-- Verify that the context window size is appropriate for the chosen LLM model
-- Debug frontend issues using browser developer tools and console logs
-- For OpenAI API issues, check your API key and quota
+# Get overall metrics
+summary = monitor.get_metrics_summary()
+```
 
-## Recent Improvements
-- Refactored application into modular components for better maintainability
-- Added proper documentation for all modules and functions
-- Improved error handling and logging across all components
-- Centralized configuration management
-- Added real-time scenario generation with stop functionality
-- Implemented customizable scenario prompt
-- Added clear history functionality
-- Improved UI responsiveness and feedback
-- Integrated OpenAI API for image analysis
-- Added support for multiple file uploads
-- Implemented inference statistics display
+Metrics tracked include:
+- Query response times
+- Embedding generation times
+- Memory usage
+- CPU utilization
+- Index size and growth
 
-## Future Improvements
-- Implement user authentication and multi-user support
-- Add support for more file formats and AI models
-- Add the possibility to be integrated to other applications (ex:Jira)
-- Enhance the UI with more interactive features and real-time updates
-- Implement a plugin system for easy extension of file processing capabilities
-- Add a feature to compare and merge multiple scenarios
-- Implement automated testing for both backend and frontend components
-- Improve error handling and user feedback for LLM server connection issues
-- Add support for different LLM providers and models
-- Implement a feature to save and load custom prompt templates
-- Add pagination for scenario history to improve performance with large datasets
-- Enhance the filtering and sorting system for scenarios
+### Testing
 
-For any questions or contributions, please contact the project maintainers.
+Run tests using pytest:
+```bash
+pytest tests/
+```
+
+#### Test Coverage
+- Vector store operations
+- Document processing
+- Scenario generation
+- Batch processing
+- Performance monitoring
+
+#### Adding New Tests
+1. Create test files in `tests/` directory
+2. Use appropriate fixtures from `conftest.py`
+3. Follow existing patterns for consistency
+
+Example:
+```python
+def test_vector_store_query():
+    # Arrange
+    store = VectorStoreManager()
+    query = "test query"
+    
+    # Act
+    results = store.similarity_search(query)
+    
+    # Assert
+    assert len(results) > 0
+```
+
+### Best Practices
+
+1. Document Processing
+- Use appropriate chunk sizes (default: 1000 chars)
+- Maintain chunk overlap (default: 200 chars)
+- Preserve document metadata
+
+2. Vector Store Operations
+- Monitor index size growth
+- Implement regular maintenance
+- Use batch operations for efficiency
+
+3. Performance Optimization
+- Cache frequently accessed embeddings
+- Use batch processing for multiple documents
+- Monitor and adjust chunk sizes based on performance
+
+4. Error Handling
+- Implement proper exception handling
+- Log errors with context
+- Maintain data consistency
+
+### Deployment Considerations
+
+1. Vector Store
+- Ensure sufficient storage for vector database
+- Monitor index size growth
+- Plan for backup and recovery
+
+2. Resource Requirements
+- CPU: Sufficient for embedding generation
+- Memory: Depends on chunk size and concurrent operations
+- Storage: Vector store + document storage
+
+3. Scaling
+- Monitor performance metrics
+- Adjust chunk sizes and batch processing
+- Consider distributed processing for large datasets
+
+### Troubleshooting
+
+1. Vector Store Issues
+- Check persistence directory permissions
+- Verify embedding dimensions
+- Monitor index corruption
+
+2. Performance Issues
+- Review monitoring metrics
+- Adjust chunk sizes
+- Check resource utilization
+
+3. Memory Management
+- Monitor memory usage patterns
+- Implement batch processing
+- Clean up unused resources
+
+### Future Improvements
+
+1. Planned Enhancements
+- Distributed vector store support
+- Advanced caching mechanisms
+- Real-time performance dashboards
+
+2. Optimization Opportunities
+- Embedding model optimization
+- Chunk size auto-tuning
+- Advanced query optimization
+
+### Contributing
+
+1. Code Style
+- Follow PEP 8 guidelines
+- Add appropriate docstrings
+- Include type hints
+
+2. Testing
+- Write tests for new features
+- Maintain test coverage
+- Include performance tests
+
+3. Documentation
+- Update developer guide
+- Document API changes
+- Include example usage
+
+### API Reference
+
+1. VectorStoreManager
+```python
+class VectorStoreManager:
+    def add_chunks(self, chunks: List[ProcessedChunk]) -> None
+    def similarity_search(self, query: str, k: int = 5) -> List[Dict]
+```
+
+2. EnhancedDocumentProcessor
+```python
+class EnhancedDocumentProcessor:
+    def process_file(self, file_path: str) -> List[ProcessedChunk]
+    def get_loader(self, file_path: str) -> BaseLoader
+```
+
+3. Performance Monitoring
+```python
+class PerformanceMonitor:
+    def track_operation(self, operation_name: str)
+    def get_metrics_summary() -> Dict[str, Any]
+```
+
+### Environment Setup
+
+1. Requirements
+```bash
+pip install -r requirements.txt
+```
+
+2. Environment Variables
+```bash
+VECTOR_DB_PATH=vector_store
+CHUNK_SIZE=1000
+CHUNK_OVERLAP=200
+```
+
+3. Database Initialization
+```python
+from models import init_db
+init_db(app)

@@ -86,7 +86,8 @@ class EnhancedDocumentProcessor:
             # Process chunks
             processed_chunks = []
             for chunk in chunks:
-                embedding = self.vector_store.embeddings.embed_query(chunk.page_content)
+                # Get embedding and ensure it's a numpy array
+                embedding = np.array(self.vector_store.embeddings.embed_query(chunk.page_content))
                 processed_chunk = ProcessedChunk(
                     content=chunk.page_content,
                     metadata={
