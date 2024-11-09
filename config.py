@@ -21,6 +21,10 @@ logger = logging.getLogger(__name__)
 class Config:
     """Configuration class holding all application settings."""
     
+    # OpenAI Configuration
+    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+    OPENAI_MODEL = os.getenv('OPENAI_MODEL', 'gpt-4-vision-preview')
+    
     # Flask configuration
     SQLALCHEMY_DATABASE_URI = 'sqlite:///scenarios.db'
     UPLOAD_FOLDER = 'uploads'
@@ -28,9 +32,28 @@ class Config:
     # Ensure upload folder exists
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     
-    # API configuration
-    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-    OPENAI_MODEL = os.getenv('OPENAI_MODEL', 'gpt-4o')
+    # Vector Store Configuration
+    VECTOR_DB_PATH = "vector_store"
+    CHUNK_SIZE = 1000
+    CHUNK_OVERLAP = 200
+    
+    # Retrieval Configuration
+    MAX_RELEVANT_CHUNKS = 5
+    SIMILARITY_THRESHOLD = 0.7
+    
+    # Cache Configuration
+    CACHE_SIZE = 1000
+    CACHE_TTL = 3600  # 1 hour
+    
+    # Local Model Configuration
+    LOCAL_MODEL_URL = "http://localhost:1234/v1/chat/completions"
+    
+    # Batch Processing Configuration
+    BATCH_SIZE = 5
+    MAX_BATCH_RETRIES = 3
+    
+    # Vector Store Paths
+    os.makedirs(VECTOR_DB_PATH, exist_ok=True)
     
     # Prompt configuration
     SYSTEM_PROMPT = "You are a test scenario generator that creates comprehensive test scenarios based on given criteria."
