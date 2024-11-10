@@ -142,7 +142,7 @@ def init_routes(app):
             
             # Ensure scenario_text is not empty before storing
             if scenario_text.strip():
-                # After generation is complete, store the scenario
+                logger.info(f"Storing scenario: Name={name}, Criteria={criteria}, Scenario={scenario_text[:100]}..., Statistics={statistics}")
                 scenario = TestScenario(
                     name=name,
                     criteria=criteria,
@@ -157,7 +157,9 @@ def init_routes(app):
                     embedding = np.array(embedding)
                 scenario.set_vector_embedding(embedding)
                 
+                logger.info(f"Adding scenario to session: {scenario}")
                 db.session.add(scenario)
+                logger.info("Committing scenario to database")
                 db.session.commit()
             
             return response
