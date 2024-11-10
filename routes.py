@@ -174,7 +174,7 @@ def init_routes(app):
                     'id': s.id,
                     'name': s.name,
                     'criteria': s.criteria,
-                    'scenario': s.scenario,
+                    'scenario': s.scenario if s.scenario else 'Scenario content is not available.',
                     'statistics': s.statistics,
                     'uploaded_files': s.uploaded_files
                 } for s in scenarios])
