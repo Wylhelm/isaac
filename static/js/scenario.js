@@ -174,6 +174,10 @@ function loadScenario(scenario) {
     document.getElementById('criteriaPlaceholder').style.display = 'none';
     
     updateGenerateButton();
+    
+    // Scroll to the top of the generated scenario
+    const generatedScenarioDiv = document.getElementById('generatedScenario');
+    generatedScenarioDiv.scrollTop = 0;
 }
 
 async function clearHistory() {
