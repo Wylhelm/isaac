@@ -3,31 +3,35 @@
 # Intelligent Scenarios Automated Assessment Creator
 
 ## Overview
-The Test Scenario Generator is an AI-powered web application designed to assist testers and QA professionals in creating comprehensive test scenarios. It analyzes documents (Word, PDF, text files, and images) to generate scenarios that adhere to the IEEE 829 standard, leveraging a local Large Language Model (LLM) for AI capabilities.
+The Test Scenario Generator is an AI-powered web application designed to assist testers and QA professionals in creating comprehensive test scenarios. It leverages Retrieval Augmented Generation (RAG) and a local Large Language Model (LLM) to analyze documents and generate contextually relevant test scenarios that adhere to the IEEE 829 standard.
 
 ## Key Features
-- Document analysis (Word, PDF, text files, and images)
-- AI-powered test scenario generation using a local LLM
-- Web-based user interface for easy access
-- Scenario history management and storage
-- File upload and processing
-- Customizable system prompt and scenario prompt
-- Adjustable context window size
-- Real-time scenario generation with stop functionality
-- Clear scenario history option
-- Export generated scenarios
-- Inference statistics display
+- Advanced RAG-based document analysis and scenario generation
+- Support for multiple file formats:
+  - Documents: PDF, Word (DOCX), Text files
+  - Images: PNG, JPG, JPEG (with AI-powered image analysis)
+- Vector-based document storage for intelligent context retrieval
+- Scenario-isolated vector stores for better context management
+- Streaming response generation with real-time output
+- Customizable system prompts and scenario templates
+- Adjustable context window size (4096 or 8192 tokens)
+- Batch processing capabilities for multiple files
+- Real-time inference statistics
+- Export functionality for generated scenarios
+- Comprehensive scenario history management
 
 ## Project Structure
-The application is organized into modular components:
-- `app.py` - Main application initialization
-- `config.py` - Configuration management
-- `models.py` - Database models
-- `file_processor.py` - File processing logic
-- `scenario_generator.py` - Test scenario generation
+The application follows a modular architecture:
+- `app.py` - Main Flask application and server initialization
+- `config.py` - Configuration management and environment settings
+- `models.py` - Database models and data structures
+- `rag_components.py` - RAG implementation and vector store management
+- `file_processor.py` - Enhanced document processing and analysis
+- `scenario_generator.py` - LLM-based scenario generation with streaming
 - `routes.py` - API endpoints and route handlers
-- `templates/` - HTML templates
+- `templates/` - HTML templates for the web interface
 - `static/` - Static assets (CSS, JS, images)
+- `vector_store/` - Persistent storage for document vectors
 
 ## Installation
 1. Ensure Python 3.7+ is installed on your system.
@@ -45,40 +49,53 @@ The application is organized into modular components:
    ```
 5. Set up a local LLM server (e.g., using LM Studio) accessible at http://localhost:1234
 
+## Configuration
+1. Copy `.env.example` to `.env` and configure:
+   - LLM server settings
+   - Vector store parameters
+   - Chunk size and overlap
+   - Maximum relevant chunks for RAG
+   - Context window size
+
 ## Usage
-1. Set up your environment variables in a `.env` file (see `.env.example` for reference)
-2. Run the application:
+1. Start the application:
    ```
    python app.py
    ```
-3. Open a web browser and navigate to `http://localhost:5000`
-4. Follow the on-screen instructions to create and generate test scenarios.
+2. Open a web browser and navigate to `http://localhost:5000`
+3. Upload documents or enter test criteria
+4. The system will:
+   - Process and analyze documents using RAG
+   - Store document vectors for context retrieval
+   - Generate contextually relevant test scenarios
+   - Provide real-time generation progress and statistics
 
 ## Requirements
 - Python 3.7+
-- Flask
-- Flask-SQLAlchemy
-- docx2txt
-- PyPDF2
-- Pillow
-- pytesseract
-- requests
-- python-dotenv
-- Local LLM server (e.g., using LM Studio) accessible at http://localhost:1234
+- Flask and Flask-SQLAlchemy
+- langchain and langchain-community
+- HuggingFace Transformers
+- ChromaDB for vector storage
+- Document processing libraries:
+  - PyPDF2
+  - python-docx
+  - Pillow
+  - pytesseract
+- Local LLM server (e.g., LM Studio)
 
 ## Documentation
-- `user_guide.md` - Detailed instructions for using the application
-- `developer_guide.md` - Technical documentation and development guidelines
+- `user_guide.md` - Comprehensive user instructions
+- `developer_guide.md` - Technical documentation and API reference
 
 ## Contributing
-Contributions are welcome! Please read the contributing guidelines in `CONTRIBUTING.md` for details on our code of conduct and the process for submitting pull requests.
+Contributions are welcome! Please read our contributing guidelines for details on submitting pull requests.
 
 ## License
 This project is licensed under the GPL-3.0 license. See the `LICENSE` file for details.
 
 ## Acknowledgments
 - CGI Innovation and Immersive Systems Community
+- HuggingFace for embeddings models
+- ChromaDB for vector storage capabilities
 
-For more detailed information:
-- User Guide: See `user_guide.md` for usage instructions
-- Developer Guide: See `developer_guide.md` for technical details and development guidelines
+For detailed usage instructions, see `user_guide.md`.
