@@ -117,6 +117,9 @@ async function generateScenario(isRegenerate = false) {
 async function loadScenarios() {
     try {
         const response = await fetch('/scenarios');
+        if (!response.ok) {
+            throw new Error('Failed to fetch scenarios');
+        }
         const scenarios = await response.json();
         const historyDiv = document.getElementById('scenarioHistory');
         
