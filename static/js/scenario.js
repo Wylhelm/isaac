@@ -144,7 +144,7 @@ function loadScenario(scenario) {
     // Update form fields
     document.getElementById('scenarioName').value = scenario.name;
     document.getElementById('criteria').value = scenario.criteria;
-    document.getElementById('generatedScenario').textContent = formatScenarioText(scenario.scenario);
+    document.getElementById('generatedScenario').textContent = scenario.scenario ? formatScenarioText(scenario.scenario) : 'No scenario content available.';
     document.getElementById('exportScenario').disabled = false;
     
     // Update inference stats
