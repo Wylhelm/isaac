@@ -46,6 +46,13 @@ class VectorStoreManager:
     def similarity_search(self, query: str, k: int = 5) -> List[Dict[str, Any]]:
         """Perform similarity search for query."""
         return self.vector_store.similarity_search(query, k=k)
+    
+    def embed_query(self, text: str) -> np.ndarray:
+        """Get embedding for text, ensuring numpy array output."""
+        embedding = self.embeddings.embed_query(text)
+        if isinstance(embedding, list):
+            embedding = np.array(embedding)
+        return embedding
 
 class EnhancedDocumentProcessor:
     """Enhanced document processor with chunking and embedding."""
@@ -86,8 +93,8 @@ class EnhancedDocumentProcessor:
             # Process chunks
             processed_chunks = []
             for chunk in chunks:
-                # Get embedding and ensure it's a numpy array
-                embedding = np.array(self.vector_store.embeddings.embed_query(chunk.page_content))
+                # Get embedding as numpy array
+                embedding = self.vector_store.embed_query(chunk.page_content)
                 processed_chunk = ProcessedChunk(
                     content=chunk.page_content,
                     metadata={
@@ -128,21 +135,17 @@ class EnhancedScenarioGenerator:
                 for i, doc in enumerate(relevant_docs)
             ])
             
-            # Enhance prompt with context
-            enhanced_prompt = Config.SCENARIO_PROMPT.format(
-                criteria=f"""
-                Using the following context and criteria, generate a detailed test scenario.
-                
-                {context}
-                
-                Criteria:
-                {criteria}
-                """
-            )
+            # If no context found, use a default message
+            if not context:
+                context = "No relevant context found in the document collection."
             
-            # Generate scenario using enhanced prompt
+            # Format the prompt with context and criteria
+            prompt_template = Config.SCENARIO_PROMPT.replace("{context}", context).replace("{criteria}", criteria)
+            
+            # Generate scenario using the formatted prompt
             from scenario_generator import generate_scenario_stream
-            return generate_scenario_stream(enhanced_prompt)
+            return generate_scenario_stream(prompt_template)
+            
         except Exception as e:
             logger.error(f"Error generating scenario: {str(e)}")
             raise

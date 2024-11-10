@@ -1,3 +1,4 @@
+# Core dependencies
 Flask==2.3.2
 requests==2.31.0
 docx2txt==0.8
@@ -8,6 +9,8 @@ Flask-SQLAlchemy==3.0.5
 python-dotenv==1.0.0
 Werkzeug==2.3.6
 SQLAlchemy==1.4.46
+
+# RAG dependencies
 langchain==0.0.284
 chromadb==0.4.6
 numpy==1.24.3
@@ -18,6 +21,18 @@ pdf2image==1.16.3
 transformers==4.33.2
 torch==2.0.1
 psutil==5.9.5
+
+# Document processing
+pdfminer.six==20221105
+python-docx==0.8.11
+opencv-python-headless==4.8.0.74
+
+# Testing
 pytest==7.4.2
 pytest-asyncio==0.21.1
 pytest-cov==4.1.0
+
+# Note: System dependencies required:
+# For macOS, install these using brew:
+# brew install tesseract
+# brew install poppler

@@ -9,6 +9,7 @@ from file_processor import process_file
 from rag_components import EnhancedScenarioGenerator, VectorStoreManager
 from config import Config, logger
 import numpy as np
+from datetime import datetime
 
 def init_routes(app):
     """Initialize all route handlers for the application."""
@@ -17,6 +18,47 @@ def init_routes(app):
     vector_store = VectorStoreManager()
     scenario_generator = EnhancedScenarioGenerator()
     
+    @app.route('/test_db', methods=['GET'])
+    def test_db():
+        """Test database operations."""
+        try:
+            # Create a test scenario
+            test_scenario = TestScenario(
+                name="Test Scenario",
+                criteria="Test criteria",
+                scenario="Test scenario content",
+                statistics="Test statistics",
+                uploaded_files="test.txt"
+            )
+            
+            # Add to session and commit
+            db.session.add(test_scenario)
+            db.session.commit()
+            logger.info(f"Created test scenario with ID: {test_scenario.id}")
+            
+            # Query all scenarios
+            scenarios = TestScenario.query.all()
+            logger.info(f"Found {len(scenarios)} scenarios")
+            
+            # Return results
+            return jsonify({
+                'created_id': test_scenario.id,
+                'total_scenarios': len(scenarios),
+                'scenarios': [{
+                    'id': s.id,
+                    'name': s.name,
+                    'criteria': s.criteria,
+                    'scenario': s.scenario,
+                    'statistics': s.statistics,
+                    'uploaded_files': s.uploaded_files,
+                    'created_at': s.created_at.isoformat() if s.created_at else None
+                } for s in scenarios]
+            })
+            
+        except Exception as e:
+            logger.error(f"Error in test_db: {str(e)}")
+            return jsonify({'error': str(e)}), 500
+
     @app.route('/')
     def index():
         """Render the main application page."""
@@ -123,6 +165,9 @@ def init_routes(app):
             name = data.get('name', '')
             criteria = data.get('criteria', '')
             
+            # Log the incoming request data
+            logger.info(f"Received generation request - Name: {name}, Criteria: {criteria}")
+            
             scenario_text = ""
             statistics = ""
             
@@ -136,33 +181,37 @@ def init_routes(app):
                     else:
                         scenario_text += chunk
                     yield chunk
-            
-            response = Response(stream_with_context(generate_stream()),
-                              content_type='text/plain')
-            
-            # Ensure scenario_text is not empty before storing
-            if scenario_text.strip():
-                logger.info(f"Storing scenario: Name={name}, Criteria={criteria}, Scenario={scenario_text[:100]}..., Statistics={statistics}")
-                scenario = TestScenario(
-                    name=name,
-                    criteria=criteria,
-                    scenario=scenario_text,
-                    statistics=statistics,
-                    uploaded_files=", ".join(data.get('uploaded_files', []))
-                )
                 
-                # Generate and store embedding for the scenario
-                embedding = vector_store.embeddings.embed_query(scenario_text)
-                if isinstance(embedding, list):
-                    embedding = np.array(embedding)
-                scenario.set_vector_embedding(embedding)
-                
-                logger.info(f"Adding scenario to session: {scenario}")
-                db.session.add(scenario)
-                logger.info("Committing scenario to database")
-                db.session.commit()
+                # After generation is complete, save the scenario
+                try:
+                    if scenario_text.strip():
+                        logger.info("Creating new TestScenario object")
+                        scenario = TestScenario(
+                            name=name,
+                            criteria=criteria,
+                            scenario=scenario_text,
+                            statistics=statistics,
+                            uploaded_files=", ".join(data.get('uploaded_files', []))
+                        )
+                        
+                        # Generate and store embedding for the scenario
+                        embedding = vector_store.embeddings.embed_query(scenario_text)
+                        if isinstance(embedding, list):
+                            embedding = np.array(embedding)
+                        scenario.set_vector_embedding(embedding)
+                        
+                        logger.info("Adding scenario to session")
+                        db.session.add(scenario)
+                        logger.info("Committing scenario to database")
+                        db.session.commit()
+                        logger.info(f"Successfully saved scenario with ID: {scenario.id}")
+                except Exception as e:
+                    logger.error(f"Error saving scenario to database: {str(e)}")
+                    db.session.rollback()
+                    raise
             
-            return response
+            return Response(stream_with_context(generate_stream()),
+                          content_type='text/plain')
             
         except Exception as e:
             logger.error(f"Error in generate: {str(e)}")
@@ -172,17 +221,21 @@ def init_routes(app):
     def get_scenarios():
         """Retrieve all stored test scenarios."""
         try:
-            if db.engine.has_table('test_scenario'):
-                scenarios = TestScenario.query.all()
-                return jsonify([{
-                    'id': s.id,
-                    'name': s.name,
-                    'criteria': s.criteria,
-                    'scenario': s.scenario if s.scenario else 'Scenario content is not available.',
-                    'statistics': s.statistics,
-                    'uploaded_files': s.uploaded_files
-                } for s in scenarios])
-            return jsonify([])
+            logger.info("Retrieving scenarios from database")
+            scenarios = TestScenario.query.all()
+            logger.info(f"Found {len(scenarios)} scenarios")
+            
+            result = [{
+                'id': s.id,
+                'name': s.name,
+                'criteria': s.criteria,
+                'scenario': s.scenario if s.scenario else 'Scenario content is not available.',
+                'statistics': s.statistics,
+                'uploaded_files': s.uploaded_files,
+                'created_at': s.created_at.isoformat() if s.created_at else None
+            } for s in scenarios]
+            
+            return jsonify(result)
         except Exception as e:
             logger.error(f"Error retrieving scenarios: {str(e)}")
             return jsonify({'error': 'Failed to retrieve scenarios'}), 500

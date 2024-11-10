@@ -6,10 +6,11 @@ import time
 import json
 import requests
 from config import Config, logger
+from rag_components import VectorStoreManager
 
 def generate_scenario_stream(criteria):
     """
-    Generate a test scenario using streaming response.
+    Generate a test scenario using streaming response with RAG.
     
     Args:
         criteria (str): The criteria for generating the test scenario
@@ -17,20 +18,40 @@ def generate_scenario_stream(criteria):
     Yields:
         str: Chunks of generated scenario content and statistics
     """
+    # Get relevant context using RAG
+    vector_store = VectorStoreManager()
+    relevant_docs = vector_store.similarity_search(criteria, k=Config.MAX_RELEVANT_CHUNKS)
+    
+    # Build context from relevant chunks
+    context = "\n".join([
+        f"Context {i+1}:\n{doc.page_content}\n"
+        for i, doc in enumerate(relevant_docs)
+    ])
+    
+    # If no context found, use a default message
+    if not context:
+        context = "No relevant context found in the document collection."
+    
     url = "http://localhost:1234/v1/chat/completions"
     headers = {"Content-Type": "application/json"}
     data = {
         "model": "local-model",
         "messages": [
             {"role": "system", "content": Config.SYSTEM_PROMPT},
-            {"role": "user", "content": Config.SCENARIO_PROMPT.format(criteria=criteria)}
+            {"role": "user", "content": Config.SCENARIO_PROMPT.format(
+                context=context,
+                criteria=criteria
+            )}
         ],
         "max_tokens": Config.CONTEXT_WINDOW_SIZE,
         "stream": True
     }
     
     start_time = time.time()
-    input_tokens = len(Config.SYSTEM_PROMPT.split()) + len(Config.SCENARIO_PROMPT.format(criteria=criteria).split())
+    input_tokens = (
+        len(Config.SYSTEM_PROMPT.split()) + 
+        len(Config.SCENARIO_PROMPT.format(context=context, criteria=criteria).split())
+    )
     output_tokens = 0
     scenario = ""
     
@@ -63,7 +84,8 @@ def generate_scenario_stream(criteria):
             statistics = (
                 f"Input Tokens: {input_tokens}\n"
                 f"Output Tokens: {output_tokens}\n"
-                f"Generation Time: {generation_time:.2f} seconds"
+                f"Generation Time: {generation_time:.2f} seconds\n"
+                f"Retrieved Contexts: {len(relevant_docs)}"
             )
             yield f"\n\nInference Statistics:\n{statistics}"
         else:

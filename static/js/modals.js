@@ -10,9 +10,12 @@ async function showPromptModal(type) {
         const response = await fetch(endpoint);
         const data = await response.json();
         
+        // Get the correct property from the response
+        const promptValue = type === 'system' ? data.system_prompt : data.scenario_prompt;
+        
         const modal = createModal({
             title: `Edit ${type.charAt(0).toUpperCase() + type.slice(1)} Prompt`,
-            content: createTextArea(data.prompt),
+            content: createTextArea(promptValue),
             onSave: async (value) => {
                 await savePrompt(type, value);
                 removeModal(modal);
@@ -35,8 +38,8 @@ async function showContextWindowModal() {
         const select = document.createElement('select');
         select.className = 'form-select mb-3';
         select.innerHTML = `
-            <option value="4096" ${data.size === 4096 ? 'selected' : ''}>4096</option>
-            <option value="8192" ${data.size === 8192 ? 'selected' : ''}>8192</option>
+            <option value="4096" ${data.context_window === 4096 ? 'selected' : ''}>4096</option>
+            <option value="8192" ${data.context_window === 8192 ? 'selected' : ''}>8192</option>
         `;
 
         const modal = createModal({
@@ -136,6 +139,22 @@ function createTextArea(value) {
 
 function removeModal(modal) {
     document.body.removeChild(modal);
+}
+
+function showAlert(message) {
+    // Create alert element
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-info';
+    alert.textContent = message;
+    
+    // Add alert to the page
+    const container = document.querySelector('.container');
+    container.insertBefore(alert, container.firstChild);
+    
+    // Remove alert after 3 seconds
+    setTimeout(() => {
+        alert.remove();
+    }, 3000);
 }
 
 // Export functions that need to be globally accessible
