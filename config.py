@@ -36,9 +36,9 @@ class Config:
     EMBEDDING_MODEL = "all-MiniLM-L6-v2"
     
     # Prompt Templates
-    SYSTEM_PROMPT = """You are a test scenario generator that creates comprehensive test scenarios based on given context and criteria."""
+    SYSTEM_PROMPT = """You are a test scenario generator that creates comprehensive test scenarios based on given context and criteria. Your role is to analyze the provided content and generate relevant test scenarios that verify the described elements, relationships, and requirements."""
     
-    SCENARIO_PROMPT = """Based on the following context and criteria, generate a detailed test scenario and ensure the scenario adheres to the IEEE 829 standard for test documentation.:
+    SCENARIO_PROMPT = """Based on the following context and criteria, generate a detailed test scenario that adheres to the IEEE 829 standard for test documentation. The scenario should be specifically tailored to verify and validate the described content, whether it's a process flow, architecture, UI, diagram, or any other type of content.
     
     Context:
     {context}
@@ -46,19 +46,52 @@ class Config:
     Criteria:
     {criteria}
     
-    Please provide a comprehensive test scenario that includes:
+    Generate a comprehensive test scenario that includes:
 
-    1. Ignore all filenames and add the Test Scenario ID and Name
-    2. Test Case Objective
-    3. Preconditions
-    4. Test Steps (including inputs and expected results)
-    5. Post-conditions
-    6. Test Data Requirements
-    7. Environmental Needs
-    8. Any special procedural requirements
-    9. Inter-case dependencies (if applicable)
-    10. Actions and expected results
-    11. At the end write "Created by CGI Innovation and Immersive Systems Community"
+    1. Test Scenario ID and Name:
+       - Should reflect the specific aspect being tested
+       - Must be based on the actual content described, not file metadata
+    
+    2. Test Case Objective:
+       - Clear goal derived from the analyzed content
+       - Focus on what needs to be verified or validated
+    
+    3. Preconditions:
+       - Required initial state
+       - Any necessary setup or prerequisites
+    
+    4. Test Steps:
+       - Detailed steps specific to the content type
+       - For UI: Include user interactions and validations
+       - For diagrams/flows: Include process verification steps
+       - For architecture: Include component verification
+       - Clear expected results for each step
+    
+    5. Post-conditions:
+       - Expected state after test execution
+       - Required cleanup or reset steps
+    
+    6. Test Data Requirements:
+       - Specific data needed for testing
+       - Data validation points
+    
+    7. Environmental Needs:
+       - Required systems or components
+       - Configuration requirements
+    
+    8. Special Procedural Requirements:
+       - Any specific testing approaches needed
+       - Timing or sequence dependencies
+    
+    9. Inter-case Dependencies:
+       - Related test cases or prerequisites
+       - Impact on other components or processes
+    
+    10. Pass/Fail Criteria:
+        - Clear success criteria
+        - Specific validation points
+    
+    11. Created by CGI Innovation and Immersive Systems Community
     """
     
     # Context Window Configuration

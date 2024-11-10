@@ -1,102 +1,77 @@
 """
 Main application module for the test scenario generator.
-Initializes and configures the Flask application.
 """
 
 import os
-import sqlite3
+from dotenv import load_dotenv
+
+# Load environment variables before any other imports
+load_dotenv()
+
 from flask import Flask
+from flask_migrate import Migrate
 from models import db, init_db
 from routes import init_routes
 from config import Config, logger
-
-def verify_db_access():
-    """Verify database file is accessible and SQLite can open it."""
-    try:
-        # Try to connect to the database
-        conn = sqlite3.connect(Config.DB_PATH)
-        # Test creating a table to verify write access
-        cursor = conn.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS test_table
-                         (id INTEGER PRIMARY KEY)''')
-        cursor.execute('DROP TABLE test_table')
-        conn.close()
-        logger.info(f"Successfully verified database access at {Config.DB_PATH}")
-        return True
-    except sqlite3.Error as e:
-        logger.error(f"SQLite error verifying database access: {str(e)}")
-        return False
-    except Exception as e:
-        logger.error(f"Unexpected error verifying database access: {str(e)}")
-        return False
+import atexit
 
 def create_app():
-    """
-    Create and configure the Flask application.
-    
-    Returns:
-        Flask: Configured Flask application instance
-    """
+    """Create and configure the Flask application."""
     try:
-        # Create Flask app with explicit instance path
-        instance_path = os.path.abspath(Config.INSTANCE_PATH)
-        app = Flask(__name__, 
-                    instance_path=instance_path,
-                    instance_relative_config=True,
-                    static_folder='static',
-                    static_url_path='/static')
+        # Initialize Flask app
+        app = Flask(__name__)
         
-        logger.info(f"Created Flask app with instance path: {instance_path}")
+        # Configure app
+        instance_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance')
+        os.makedirs(instance_path, exist_ok=True)
+        app.config['INSTANCE_PATH'] = instance_path
+        app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(instance_path, "isaac.db")}'
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
         
-        # Verify database access
-        if not verify_db_access():
-            raise Exception("Unable to access database file")
+        # Ensure required directories exist
+        app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
         
-        # Configure the application
-        app.config.from_object(Config)
-        logger.info(f"Database URL: {app.config['SQLALCHEMY_DATABASE_URI']}")
+        vector_store_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'vector_store')
+        os.makedirs(vector_store_path, exist_ok=True)
+        Config.VECTOR_DB_PATH = vector_store_path
         
-        # Initialize extensions
+        # Initialize database
         db.init_app(app)
-        logger.info("Initialized database extension")
         
-        # Initialize database and create tables
+        # Initialize migrations
+        migrate = Migrate(app, db)
+        
+        # Initialize routes
+        init_routes(app)
+        
+        # Initialize database tables
         with app.app_context():
             db.create_all()
-            logger.info("Created all database tables")
-            
-            # Verify tables were created
-            inspector = db.inspect(db.engine)
-            tables = inspector.get_table_names()
-            logger.info(f"Existing tables in database: {tables}")
+            logger.info("Database tables created successfully")
         
-        # Register routes
-        init_routes(app)
-        logger.info("Registered routes")
+        # Register cleanup function
+        def cleanup():
+            """Cleanup function to run on application shutdown."""
+            try:
+                from file_processor import cleanup_old_files
+                with app.app_context():
+                    cleanup_old_files(app)
+                logger.info("Cleanup completed successfully")
+            except Exception as e:
+                logger.error(f"Error during cleanup: {str(e)}")
         
+        atexit.register(cleanup)
+        
+        logger.info("Application initialized successfully")
         return app
         
     except Exception as e:
         logger.error(f"Error creating application: {str(e)}")
         raise
 
+app = create_app()
+
 if __name__ == '__main__':
-    try:
-        logger.info("Starting the Flask application")
-        
-        # Create required directories
-        for directory in [Config.UPLOAD_FOLDER, Config.VECTOR_DB_PATH, Config.INSTANCE_PATH]:
-            os.makedirs(directory, mode=0o755, exist_ok=True)
-            logger.info(f"Ensured directory exists with proper permissions: {directory}")
-        
-        # Create the application
-        app = create_app()
-        
-        # Run the application
-        app.run(debug=True)
-        
-    except Exception as e:
-        logger.error(f"Failed to start application: {str(e)}")
-        raise
-    finally:
-        logger.info("Flask application has stopped")
+    app.run(debug=True, port=5000)

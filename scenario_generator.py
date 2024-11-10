@@ -34,24 +34,21 @@ def generate_scenario_stream(criteria):
     
     url = "http://localhost:1234/v1/chat/completions"
     headers = {"Content-Type": "application/json"}
+    
+    # Combine system prompt and scenario prompt into a single user message
+    combined_prompt = f"{Config.SYSTEM_PROMPT}\n\n{Config.SCENARIO_PROMPT.format(context=context, criteria=criteria)}"
+    
     data = {
         "model": "local-model",
         "messages": [
-            {"role": "system", "content": Config.SYSTEM_PROMPT},
-            {"role": "user", "content": Config.SCENARIO_PROMPT.format(
-                context=context,
-                criteria=criteria
-            )}
+            {"role": "user", "content": combined_prompt}
         ],
         "max_tokens": Config.CONTEXT_WINDOW_SIZE,
         "stream": True
     }
     
     start_time = time.time()
-    input_tokens = (
-        len(Config.SYSTEM_PROMPT.split()) + 
-        len(Config.SCENARIO_PROMPT.format(context=context, criteria=criteria).split())
-    )
+    input_tokens = len(combined_prompt.split())
     output_tokens = 0
     scenario = ""
     
