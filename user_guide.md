@@ -1,7 +1,7 @@
-# Test Scenario Generator - User Guide
+# ISAAC - User Guide
 
 ## Introduction
-The Test Scenario Generator is an AI-powered web application that uses Retrieval Augmented Generation (RAG) to create comprehensive test scenarios. It intelligently analyzes documents and images to generate contextually relevant scenarios that adhere to the IEEE 829 standard, leveraging a local Large Language Model (LLM) for AI capabilities.
+ISAAC is an AI-powered web application that uses Retrieval Augmented Generation (RAG) to create comprehensive test scenarios. It intelligently analyzes documents and images to generate contextually relevant scenarios that adhere to the IEEE 829 standard, leveraging a local Large Language Model (LLM) for AI capabilities.
 
 ## Getting Started
 1. Ensure the application is running and accessible (typically at http://localhost:5000)
@@ -161,5 +161,3 @@ For technical issues:
 - Stable internet connection
 - Access to local LLM server
 - Sufficient system resources for processing
-
-For technical details and API documentation, please refer to the developer guide.
