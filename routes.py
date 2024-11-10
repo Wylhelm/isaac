@@ -140,23 +140,25 @@ def init_routes(app):
             response = Response(stream_with_context(generate_stream()),
                               content_type='text/plain')
             
-            # After generation is complete, store the scenario
-            scenario = TestScenario(
-                name=name,
-                criteria=criteria,
-                scenario=scenario_text,
-                statistics=statistics,
-                uploaded_files=", ".join(data.get('uploaded_files', []))
-            )
-            
-            # Generate and store embedding for the scenario
-            embedding = vector_store.embeddings.embed_query(scenario_text)
-            if isinstance(embedding, list):
-                embedding = np.array(embedding)
-            scenario.set_vector_embedding(embedding)
-            
-            db.session.add(scenario)
-            db.session.commit()
+            # Ensure scenario_text is not empty before storing
+            if scenario_text.strip():
+                # After generation is complete, store the scenario
+                scenario = TestScenario(
+                    name=name,
+                    criteria=criteria,
+                    scenario=scenario_text,
+                    statistics=statistics,
+                    uploaded_files=", ".join(data.get('uploaded_files', []))
+                )
+                
+                # Generate and store embedding for the scenario
+                embedding = vector_store.embeddings.embed_query(scenario_text)
+                if isinstance(embedding, list):
+                    embedding = np.array(embedding)
+                scenario.set_vector_embedding(embedding)
+                
+                db.session.add(scenario)
+                db.session.commit()
             
             return response
             
