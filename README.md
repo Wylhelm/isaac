@@ -1,4 +1,4 @@
-![Test Scenario Generator](static/images/appbanner.png)
+![Test Scenario Generator](static/images/isaac.png)
 
 # Test Scenario Generator
 
