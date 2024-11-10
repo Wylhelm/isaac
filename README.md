@@ -1,9 +1,9 @@
-![Test Scenario Generator](static/images/isaac.png)
+![ISAAC](static/images/isaac.png)
 
 # Intelligent Scenarios Automated Assessment Creator
 
 ## Overview
-The Test Scenario Generator is an AI-powered web application designed to assist testers and QA professionals in creating comprehensive test scenarios. It leverages Retrieval Augmented Generation (RAG) and a local Large Language Model (LLM) to analyze documents and generate contextually relevant test scenarios that adhere to the IEEE 829 standard.
+ISAAC is an AI-powered web application designed to assist testers and QA professionals in creating comprehensive test scenarios. It leverages Retrieval Augmented Generation (RAG) and a local Large Language Model (LLM) to analyze documents and generate contextually relevant test scenarios that adhere to the IEEE 829 standard.
 
 ## Key Features
 - Advanced RAG-based document analysis and scenario generation
