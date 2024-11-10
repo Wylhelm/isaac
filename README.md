@@ -1,6 +1,6 @@
 ![Test Scenario Generator](static/images/isaac.png)
 
-# Test Scenario Generator
+# Intelligent Scenarios Automated Assessment Creator
 
 ## Overview
 The Test Scenario Generator is an AI-powered web application designed to assist testers and QA professionals in creating comprehensive test scenarios. It analyzes documents (Word, PDF, text files, and images) to generate scenarios that adhere to the IEEE 829 standard, leveraging a local Large Language Model (LLM) for AI capabilities.
