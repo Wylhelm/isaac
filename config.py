@@ -32,67 +32,79 @@ class Config:
     VECTOR_DB_PATH = os.path.join(PROJECT_ROOT, "vector_store")
     CHUNK_SIZE = 1000
     CHUNK_OVERLAP = 200
-    MAX_RELEVANT_CHUNKS = 5
+    MAX_RELEVANT_CHUNKS = 10  # Increased from 5 to get more context
     EMBEDDING_MODEL = "all-MiniLM-L6-v2"
     
     # Prompt Templates
-    SYSTEM_PROMPT = """You are a test scenario generator that creates comprehensive test scenarios based on given context and criteria. Your role is to analyze the provided content and generate relevant test scenarios that verify the described elements, relationships, and requirements."""
-    
-    SCENARIO_PROMPT = """Based on the following context and criteria, generate a detailed test scenario that adheres to the IEEE 829 standard for test documentation. The scenario should be specifically tailored to verify and validate the described content, whether it's a process flow, architecture, UI, diagram, or any other type of content.
-    
-    Context:
-    {context}
-    
-    Criteria:
-    {criteria}
-    
-    Generate a comprehensive test scenario that includes:
+    SYSTEM_PROMPT = """You are a test scenario generator that creates comprehensive test scenarios based on given context and criteria. Your role is to analyze the provided content and generate relevant test scenarios that verify the described elements, relationships, and requirements.
 
-    1. Test Scenario ID and Name:
-       - Should reflect the specific aspect being tested
-       - Must be based on the actual content described, not file metadata
+IMPORTANT: You must ONLY use information from the provided context documents to create the test scenario. Do not rely on general knowledge or assumptions. Every aspect of the generated scenario must be traceable back to specific content in the provided context."""
     
-    2. Test Case Objective:
-       - Clear goal derived from the analyzed content
-       - Focus on what needs to be verified or validated
+    SCENARIO_PROMPT = """Based on the following context documents and criteria, generate a detailed test scenario that adheres to the IEEE 829 standard for test documentation. The scenario must be specifically derived from and reference the provided context documents.
+
+Context Documents:
+{context}
+
+Criteria:
+{criteria}
+
+IMPORTANT INSTRUCTIONS:
+1. You MUST use ONLY information from the provided context documents
+2. Do NOT use general knowledge or assumptions
+3. Every test step must reference specific content from the context
+4. If context is insufficient, state what information is missing
+5. Include document references for traceability
+
+Generate a comprehensive test scenario with the following structure:
+
+1. Test Scenario ID and Name:
+   - Must reference specific content from context documents
+   - Include source document reference
+   
+2. Test Case Objective:
+   - Must be derived directly from context documents
+   - Include specific references to requirements/features described in context
+   - State which context document(s) the objective is based on
+   
+3. Preconditions:
+   - List only prerequisites mentioned in or implied by context documents
+   - Include document references for each precondition
+   
+4. Test Steps:
+   - Each step must be based on specific content from context
+   - Format: [Doc Ref] Step Description
+   - Include exact quotes or paraphrasing from context where relevant
+   - For each step, cite which context document it comes from
+   
+5. Post-conditions:
+   - Must be derived from context documents
+   - Include document references
+   
+6. Test Data Requirements:
+   - Only include data elements mentioned in context
+   - Reference source documents for each data item
+   
+7. Environmental Needs:
+   - List only systems/components mentioned in context
+   - Include document references
+   
+8. Special Procedural Requirements:
+   - Only include procedures specified in context
+   - Reference source documents
+   
+9. Inter-case Dependencies:
+   - Only list dependencies mentioned in context
+   - Include document references
+   
+10. Pass/Fail Criteria:
+    - Must be based on specific requirements from context
+    - Include document references for each criterion
     
-    3. Preconditions:
-       - Required initial state
-       - Any necessary setup or prerequisites
-    
-    4. Test Steps:
-       - Detailed steps specific to the content type
-       - For UI: Include user interactions and validations
-       - For diagrams/flows: Include process verification steps
-       - For architecture: Include component verification
-       - Clear expected results for each step
-    
-    5. Post-conditions:
-       - Expected state after test execution
-       - Required cleanup or reset steps
-    
-    6. Test Data Requirements:
-       - Specific data needed for testing
-       - Data validation points
-    
-    7. Environmental Needs:
-       - Required systems or components
-       - Configuration requirements
-    
-    8. Special Procedural Requirements:
-       - Any specific testing approaches needed
-       - Timing or sequence dependencies
-    
-    9. Inter-case Dependencies:
-       - Related test cases or prerequisites
-       - Impact on other components or processes
-    
-    10. Pass/Fail Criteria:
-        - Clear success criteria
-        - Specific validation points
-    
-    11. Created by CGI Innovation and Immersive Systems Community
-    """
+11. Created by CGI Innovation and Immersive Systems Community
+
+If any section cannot be completed due to missing information in the context, explicitly state:
+"[MISSING] Required information not found in provided context: <description of what's missing>"
+"""
     
     # Context Window Configuration
     CONTEXT_WINDOW_SIZE = 8192

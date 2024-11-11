@@ -96,7 +96,7 @@ def init_routes(app):
                 
                 try:
                     # Generate scenario using RAG
-                    for chunk in scenario_generator.generate_scenario(criteria):
+                    for chunk in scenario_generator.generate_scenario_stream(criteria):
                         if chunk.startswith("\n\nInference Statistics:"):
                             statistics = chunk.split("\n\nInference Statistics:\n")[1]
                         else:
