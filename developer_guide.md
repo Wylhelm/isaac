@@ -50,12 +50,7 @@ It is recommended to use a virtual environment to manage dependencies and avoid 
    ```
    pip install -r requirements.txt
    ```
-4. Copy `.env.example` to `.env` and configure:
-   - LLM server settings
-   - Vector store parameters
-   - Chunk size and overlap
-   - Maximum relevant chunks for RAG
-   - Context window size
+4. Copy `.env.example` to `.env` and configure it.
 
 ## Architecture Overview
 The application follows a modular architecture:

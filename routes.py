@@ -202,6 +202,75 @@ def init_routes(app):
             logger.error(f"Error clearing history: {str(e)}")
             return jsonify({'success': False, 'error': str(e)}), 500
 
+    @app.route('/get_system_prompt', methods=['GET'])
+    def get_system_prompt():
+        """Get the current system prompt."""
+        try:
+            return jsonify({'system_prompt': Config.SYSTEM_PROMPT})
+        except Exception as e:
+            logger.error(f"Error getting system prompt: {str(e)}")
+            return jsonify({'error': 'Failed to get system prompt'}), 500
+
+    @app.route('/update_system_prompt', methods=['POST'])
+    def update_system_prompt():
+        """Update the system prompt."""
+        try:
+            data = request.json
+            new_prompt = data.get('system_prompt')
+            if not new_prompt:
+                return jsonify({'error': 'No system prompt provided'}), 400
+            Config.SYSTEM_PROMPT = new_prompt
+            return jsonify({'success': True, 'system_prompt': Config.SYSTEM_PROMPT})
+        except Exception as e:
+            logger.error(f"Error updating system prompt: {str(e)}")
+            return jsonify({'error': 'Failed to update system prompt'}), 500
+
+    @app.route('/get_scenario_prompt', methods=['GET'])
+    def get_scenario_prompt():
+        """Get the current scenario prompt template."""
+        try:
+            return jsonify({'scenario_prompt': Config.SCENARIO_PROMPT})
+        except Exception as e:
+            logger.error(f"Error getting scenario prompt: {str(e)}")
+            return jsonify({'error': 'Failed to get scenario prompt'}), 500
+
+    @app.route('/update_scenario_prompt', methods=['POST'])
+    def update_scenario_prompt():
+        """Update the scenario prompt template."""
+        try:
+            data = request.json
+            new_prompt = data.get('scenario_prompt')
+            if not new_prompt:
+                return jsonify({'error': 'No scenario prompt provided'}), 400
+            Config.SCENARIO_PROMPT = new_prompt
+            return jsonify({'success': True, 'scenario_prompt': Config.SCENARIO_PROMPT})
+        except Exception as e:
+            logger.error(f"Error updating scenario prompt: {str(e)}")
+            return jsonify({'error': 'Failed to update scenario prompt'}), 500
+
+    @app.route('/get_context_window', methods=['GET'])
+    def get_context_window():
+        """Get the current context window size."""
+        try:
+            return jsonify({'context_window': Config.CONTEXT_WINDOW_SIZE})
+        except Exception as e:
+            logger.error(f"Error getting context window size: {str(e)}")
+            return jsonify({'error': 'Failed to get context window size'}), 500
+
+    @app.route('/update_context_window', methods=['POST'])
+    def update_context_window():
+        """Update the context window size."""
+        try:
+            data = request.json
+            new_size = data.get('context_window')
+            if not isinstance(new_size, int) or new_size <= 0:
+                return jsonify({'error': 'Invalid context window size'}), 400
+            Config.CONTEXT_WINDOW_SIZE = new_size
+            return jsonify({'success': True, 'context_window': Config.CONTEXT_WINDOW_SIZE})
+        except Exception as e:
+            logger.error(f"Error updating context window size: {str(e)}")
+            return jsonify({'error': 'Failed to update context window size'}), 500
+
     @app.route('/debug')
     def debug():
         """Debug endpoint to verify application is running."""
