@@ -159,7 +159,8 @@ function loadScenario(scenario) {
     inferenceStatsDiv.textContent = scenario.statistics || '';
     inferenceStatsDiv.style.display = scenario.statistics ? 'block' : 'none';
     
-    // Update file list
+    // Clear the file input and update file list
+    clearFileInput(); // Call the new clearFileInput function
     const fileList = document.getElementById('fileList');
     fileList.innerHTML = '';
     if (scenario.uploaded_files) {

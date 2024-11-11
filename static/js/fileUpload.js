@@ -11,19 +11,34 @@ async function handleFileUpload(event) {
 
     // Add files to form data and create list items
     for (let i = 0; i < files.length; i++) {
-        formData.append('files', files[i]);
+        const file = files[i];
+        if (!file || !file.name) continue; // Skip invalid files
         
-        // Create and append list item
+        formData.append('files', file);
+        
+        // Create and append list item with sanitized filename
         const li = document.createElement('li');
-        li.className = 'list-group-item';
-        li.textContent = files[i].name;
+        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+        
+        // Create filename span
+        const filenameSpan = document.createElement('span');
+        filenameSpan.textContent = file.name.trim() || 'Unnamed file';
+        li.appendChild(filenameSpan);
         
         // Add analyzing indicator for images
-        if (files[i].type.startsWith('image/')) {
-            li.textContent += ' (Analyzing image...)';
+        if (file.type.startsWith('image/')) {
+            const statusSpan = document.createElement('span');
+            statusSpan.className = 'badge bg-info text-white';
+            statusSpan.textContent = 'Analyzing image...';
+            li.appendChild(statusSpan);
         }
         
         fileList.appendChild(li);
+    }
+
+    if (formData.getAll('files').length === 0) {
+        showAlert('No valid files selected');
+        return;
     }
 
     try {
@@ -34,7 +49,7 @@ async function handleFileUpload(event) {
         });
 
         if (!response.ok) {
-            throw new Error('Upload failed');
+            throw new Error(`Upload failed: ${response.statusText}`);
         }
 
         const data = await response.json();
@@ -42,15 +57,22 @@ async function handleFileUpload(event) {
         // Update file list and criteria textarea
         let newContent = criteriaTextarea.value;
         data.results.forEach((result, index) => {
-            const li = fileList.children[fileList.children.length - files.length + index];
+            if (!result || !result.filename) return; // Skip invalid results
             
-            // Update list item text
-            if (li.textContent.includes('(Analyzing image...)')) {
-                li.textContent = li.textContent.replace(' (Analyzing image...)', ' (Analysis complete)');
+            // Find the last added list items
+            const startIndex = fileList.children.length - files.length;
+            const li = fileList.children[startIndex + index];
+            if (!li) return; // Skip if list item doesn't exist
+            
+            // Update status badge if it exists
+            const statusBadge = li.querySelector('.badge');
+            if (statusBadge) {
+                statusBadge.className = 'badge bg-success text-white';
+                statusBadge.textContent = 'Analysis complete';
             }
             
             // Add file content to criteria
-            newContent += `\n\nFile: ${result.filename}\n${result.content}`;
+            newContent += `\n\nFile: ${result.filename}\n${result.content || ''}`;
         });
 
         // Update criteria textarea
@@ -68,13 +90,40 @@ async function handleFileUpload(event) {
 
     } catch (error) {
         console.error('File upload error:', error);
-        showAlert('Failed to upload files. Please try again.');
+        showAlert(`Upload failed: ${error.message}`);
         
-        // Remove failed uploads from the list
-        Array.from(files).forEach(() => {
-            fileList.removeChild(fileList.lastChild);
-        });
+        // Update status badges to show error for the last added files
+        const startIndex = fileList.children.length - files.length;
+        for (let i = 0; i < files.length; i++) {
+            const li = fileList.children[startIndex + i];
+            if (li) {
+                const statusBadge = li.querySelector('.badge');
+                if (statusBadge) {
+                    statusBadge.className = 'badge bg-danger text-white';
+                    statusBadge.textContent = 'Upload failed';
+                }
+            }
+        }
     }
+}
+
+// Function to clear the file input
+function clearFileInput() {
+    const fileUpload = document.getElementById('fileUpload');
+    // Create a new file input element
+    const newFileInput = document.createElement('input');
+    newFileInput.type = 'file';
+    newFileInput.id = fileUpload.id;
+    newFileInput.name = fileUpload.name;
+    newFileInput.className = fileUpload.className;
+    newFileInput.multiple = fileUpload.multiple;
+    newFileInput.accept = fileUpload.accept;
+    
+    // Copy event listeners
+    newFileInput.addEventListener('change', handleFileUpload);
+    
+    // Replace the old input with the new one
+    fileUpload.parentNode.replaceChild(newFileInput, fileUpload);
 }
 
 // Add drag and drop functionality
@@ -122,3 +171,4 @@ function initializeDragAndDrop() {
 
 // Export functions that need to be globally accessible
 window.initializeFileUpload = initializeFileUpload;
+window.clearFileInput = clearFileInput;
