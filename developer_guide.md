@@ -6,7 +6,7 @@ ISAAC (Intelligent Scenarios Automated Assessment Creator) is an AI-powered web 
 ## Project Setup
 
 ### Prerequisites
-- Ensure Python 3.7+ is installed on your system.
+- Ensure Python 3.10+ is installed on your system.
 - Set up a local LLM server (e.g., using LM Studio) accessible at http://localhost:1234.
 
 ### Environment Setup

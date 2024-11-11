@@ -58,7 +58,7 @@ For detailed installation and setup instructions, including environment setup, p
    - Provide real-time generation progress and statistics
 
 ## Requirements
-- Python 3.7+
+- Python 3.10+
 - Flask and Flask-SQLAlchemy
 - langchain and langchain-community
 - HuggingFace Transformers
