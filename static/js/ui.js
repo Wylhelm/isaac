@@ -41,6 +41,9 @@ function handleCreateScenario() {
     document.getElementById('scenarioForm').reset();
     document.getElementById('scenarioForm').style.display = 'block';
 
+    // Explicitly clear the file input value
+    fileUploadInput.value = '';
+
     // Set new scenario name
     scenarioNameInput.value = `Scenario ${window.scenarioCounter || 1}`;
     window.scenarioCounter = (window.scenarioCounter || 1) + 1;
