@@ -30,7 +30,7 @@ It is recommended to use a virtual environment to manage dependencies and avoid 
 #### Using Conda
 1. Create a Conda environment:
    ```
-   conda create --name isaac_env python=3.7
+   conda create --name isaac_env python=3.10
    ```
 2. Activate the Conda environment:
    ```
@@ -40,11 +40,11 @@ It is recommended to use a virtual environment to manage dependencies and avoid 
 ### Installation
 1. Clone the repository:
    ```
-   git clone https://github.com/Wylhelm/qa-ai-super.git
+   git clone https://github.com/Wylhelm/isaac.git
    ```
 2. Navigate to the project directory:
    ```
-   cd qa-ai-super
+   cd isaac
    ```
 3. Install the required dependencies:
    ```
