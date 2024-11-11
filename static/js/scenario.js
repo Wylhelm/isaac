@@ -23,6 +23,8 @@ function initializeScenarioHandling() {
 }
 
 function formatScenarioText(text) {
+    if (!text) return '';
+    
     // Remove excessive blank lines (more than 2 consecutive newlines)
     text = text.replace(/\n{3,}/g, '\n\n');
     
@@ -42,8 +44,8 @@ function formatScenarioText(text) {
 }
 
 async function generateScenario(isRegenerate = false) {
-    const name = document.getElementById('scenarioName').value;
-    const criteria = document.getElementById('criteria').value;
+    const name = document.getElementById('scenarioName').value || '';
+    const criteria = document.getElementById('criteria').value || '';
     const uploadedFiles = Array.from(document.getElementById('fileList').children).map(li => li.textContent);
     const generatedScenarioDiv = document.getElementById('generatedScenario');
     const inferenceStatsDiv = document.getElementById('inferenceStats');
@@ -128,8 +130,8 @@ async function loadScenarios() {
             const div = document.createElement('div');
             div.className = 'history-item';
             div.innerHTML = `
-                <strong>${scenario.name}</strong>
-                <p class="mb-1">${formatScenarioText(scenario.scenario.substring(0, 100))}...</p>
+                <strong>${scenario.name || 'Untitled'}</strong>
+                <p class="mb-1">${formatScenarioText(scenario.scenario || '').substring(0, 100)}...</p>
                 <small class="d-block">Files: ${scenario.uploaded_files || 'None'}</small>
                 <small class="d-block text-muted">${scenario.statistics || ''}</small>
             `;
@@ -144,11 +146,13 @@ async function loadScenarios() {
 }
 
 function loadScenario(scenario) {
-    // Update form fields
-    document.getElementById('scenarioName').value = scenario.name;
-    document.getElementById('criteria').value = scenario.criteria;
-    document.getElementById('generatedScenario').textContent = scenario.scenario ? formatScenarioText(scenario.scenario) : 'Scenario content is not available.';
-    document.getElementById('exportScenario').disabled = false;
+    if (!scenario) return;
+    
+    // Update form fields with null checks
+    document.getElementById('scenarioName').value = scenario.name || '';
+    document.getElementById('criteria').value = scenario.criteria || '';
+    document.getElementById('generatedScenario').textContent = scenario.scenario ? formatScenarioText(scenario.scenario) : '';
+    document.getElementById('exportScenario').disabled = !scenario.scenario;
     
     // Update inference stats
     const inferenceStatsDiv = document.getElementById('inferenceStats');
@@ -156,10 +160,18 @@ function loadScenario(scenario) {
     inferenceStatsDiv.style.display = scenario.statistics ? 'block' : 'none';
     
     // Update file list
-    document.getElementById('fileList').innerHTML = scenario.uploaded_files ? 
-        scenario.uploaded_files.split(', ').map(file => 
-            `<li class="list-group-item">${file}</li>`
-        ).join('') : '';
+    const fileList = document.getElementById('fileList');
+    fileList.innerHTML = '';
+    if (scenario.uploaded_files) {
+        scenario.uploaded_files.split(', ').forEach(file => {
+            if (file.trim()) {
+                const li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.textContent = file;
+                fileList.appendChild(li);
+            }
+        });
+    }
     
     // Enable form elements
     document.getElementById('scenarioName').disabled = false;

@@ -3,30 +3,47 @@ function initializeUI() {
     const darkModeToggle = document.getElementById('darkModeToggle');
     const criteriaTextarea = document.getElementById('criteria');
     const exportScenarioBtn = document.getElementById('exportScenario');
+    const scenarioNameInput = document.getElementById('scenarioName');
+
+    // Initialize form state
+    scenarioNameInput.disabled = true;
+    criteriaTextarea.disabled = true;
+    exportScenarioBtn.disabled = true;
 
     // Initialize event listeners
     createScenarioBtn.addEventListener('click', handleCreateScenario);
     darkModeToggle.addEventListener('click', toggleDarkMode);
-    criteriaTextarea.addEventListener('input', toggleCriteriaPlaceholder);
+    criteriaTextarea.addEventListener('input', () => {
+        toggleCriteriaPlaceholder();
+        updateGenerateButton();
+    });
     exportScenarioBtn.addEventListener('click', exportScenario);
 
     // Initialize placeholder visibility
     toggleCriteriaPlaceholder();
+
+    // Initialize generate button state
+    updateGenerateButton();
 }
 
 function handleCreateScenario() {
     // Enable form elements
-    document.getElementById('scenarioName').disabled = false;
-    document.getElementById('criteria').disabled = false;
-    document.getElementById('fileUpload').disabled = false;
+    const scenarioNameInput = document.getElementById('scenarioName');
+    const criteriaTextarea = document.getElementById('criteria');
+    const fileUploadInput = document.getElementById('fileUpload');
+    const generateButton = document.getElementById('generateButton');
+    
+    scenarioNameInput.disabled = false;
+    criteriaTextarea.disabled = false;
+    fileUploadInput.disabled = false;
     
     // Reset form
     document.getElementById('scenarioForm').reset();
     document.getElementById('scenarioForm').style.display = 'block';
 
     // Set new scenario name
-    document.getElementById('scenarioName').value = `Scenario ${window.scenarioCounter}`;
-    window.scenarioCounter++;
+    scenarioNameInput.value = `Scenario ${window.scenarioCounter || 1}`;
+    window.scenarioCounter = (window.scenarioCounter || 1) + 1;
 
     // Clear UI elements
     document.getElementById('generatedScenario').textContent = '';
@@ -34,10 +51,10 @@ function handleCreateScenario() {
     document.getElementById('fileList').innerHTML = '';
 
     // Update button states
-    const generateButton = document.getElementById('generateButton');
     generateButton.textContent = 'Generate Scenario';
     generateButton.classList.remove('btn-success');
     generateButton.classList.add('btn-primary');
+    generateButton.disabled = true;
 
     // Clear inference stats
     const inferenceStatsDiv = document.getElementById('inferenceStats');
@@ -49,7 +66,7 @@ function handleCreateScenario() {
     updateGenerateButton();
 
     // Focus on scenario name input
-    document.getElementById('scenarioName').focus();
+    scenarioNameInput.focus();
 }
 
 function toggleDarkMode() {
@@ -72,27 +89,46 @@ function toggleCriteriaPlaceholder() {
     const placeholder = document.getElementById('criteriaPlaceholder');
     const isFormActive = !document.getElementById('scenarioName').disabled;
     
-    placeholder.style.display = (criteria.value.trim() === '' && !isFormActive) ? 'block' : 'none';
+    if (!criteria || !placeholder) return;
+    
+    const criteriaValue = criteria.value || '';
+    placeholder.style.display = (criteriaValue.trim() === '' && !isFormActive) ? 'block' : 'none';
 }
 
 function updateGenerateButton() {
     const generateButton = document.getElementById('generateButton');
-    const criteria = document.getElementById('criteria').value.trim();
+    const criteria = document.getElementById('criteria');
     
-    if (criteria === '') {
+    if (!generateButton || !criteria) return;
+    
+    const criteriaValue = criteria.value || '';
+    const isFormActive = !document.getElementById('scenarioName').disabled;
+    
+    if (criteriaValue.trim() === '' || !isFormActive) {
         generateButton.disabled = true;
-        generateButton.classList.remove('btn-success');
+        generateButton.classList.remove('btn-success', 'btn-primary');
         generateButton.classList.add('btn-secondary');
     } else {
         generateButton.disabled = false;
-        generateButton.classList.remove('btn-secondary');
-        generateButton.classList.add('btn-success');
+        if (generateButton.textContent === 'Generate Scenario') {
+            generateButton.classList.remove('btn-secondary', 'btn-success');
+            generateButton.classList.add('btn-primary');
+        } else {
+            generateButton.classList.remove('btn-secondary', 'btn-primary');
+            generateButton.classList.add('btn-success');
+        }
     }
 }
 
 function exportScenario() {
     const scenario = document.getElementById('generatedScenario').textContent;
-    const scenarioName = document.getElementById('scenarioName').value;
+    const scenarioName = document.getElementById('scenarioName').value || 'untitled';
+    
+    if (!scenario.trim()) {
+        showAlert('No scenario content to export');
+        return;
+    }
+    
     const blob = new Blob([scenario], {type: 'text/plain'});
     const url = URL.createObjectURL(blob);
     

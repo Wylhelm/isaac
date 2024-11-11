@@ -68,7 +68,8 @@ For detailed installation and setup instructions, including environment setup, p
   - python-docx
   - Pillow
   - pytesseract
-- Local LLM server (e.g., LM Studio)
+- Local LLM server (e.g., LM Studio) 
+  - recommended LLM for best results: Mistral Nemo 2407 Q5_K_M
 
 ## Documentation
 - `user_guide.md` - Comprehensive user instructions
