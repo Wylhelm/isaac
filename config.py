@@ -52,7 +52,7 @@ IMPORTANT INSTRUCTIONS:
 1. You MUST use ONLY information from the provided context documents
 2. Do NOT use general knowledge or assumptions
 3. Every test step must reference specific content from the context
-4. If context is insufficient, state what information is missing
+4. If context is insufficient, state what information is missing 
 5. Include document references for traceability
 
 Generate a comprehensive test scenario with the following structure:
