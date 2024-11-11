@@ -9,6 +9,34 @@ ISAAC (Intelligent Scenarios Automated Assessment Creator) is an AI-powered web 
 - Ensure Python 3.7+ is installed on your system.
 - Set up a local LLM server (e.g., using LM Studio) accessible at http://localhost:1234.
 
+### Environment Setup
+It is recommended to use a virtual environment to manage dependencies and avoid conflicts. You can use either Python's built-in `venv` module or Conda.
+
+#### Using Python's `venv`
+1. Create a virtual environment:
+   ```
+   python3 -m venv env
+   ```
+2. Activate the virtual environment:
+   - On macOS and Linux:
+     ```
+     source env/bin/activate
+     ```
+   - On Windows:
+     ```
+     .\env\Scripts\activate
+     ```
+
+#### Using Conda
+1. Create a Conda environment:
+   ```
+   conda create --name isaac_env python=3.7
+   ```
+2. Activate the Conda environment:
+   ```
+   conda activate isaac_env
+   ```
+
 ### Installation
 1. Clone the repository:
    ```

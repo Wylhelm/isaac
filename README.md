@@ -34,20 +34,7 @@ The application follows a modular architecture:
 - `vector_store/` - Persistent storage for document vectors
 
 ## Installation
-1. Ensure Python 3.7+ is installed on your system.
-2. Clone this repository:
-   ```
-   git clone https://github.com/Wylhelm/qa-ai-super.git
-   ```
-3. Navigate to the project directory:
-   ```
-   cd qa-ai-super
-   ```
-4. Install the required dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
-5. Set up a local LLM server (e.g., using LM Studio) accessible at http://localhost:1234
+For detailed installation and setup instructions, including environment setup, please refer to the [Developer Guide](developer_guide.md).
 
 ## Configuration
 1. Copy `.env.example` to `.env` and configure:
