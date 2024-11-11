@@ -3,3 +3,7 @@ scenarios.db
 .env
 __pycache__
 *.pyc
+instance/
+instance/isaac.db
+vector_store/
+uploads/
