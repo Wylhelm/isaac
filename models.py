@@ -22,6 +22,7 @@ class TestScenario(db.Model):
     criteria = db.Column(db.Text, nullable=False)
     scenario = db.Column(db.Text, nullable=False)
     statistics = db.Column(db.Text, nullable=True)
+    uploaded_files = db.Column(db.Text, nullable=True)  # Store comma-separated list of uploaded filenames
     created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
     
     # Relationships
@@ -103,8 +104,15 @@ def init_db(app):
             db.create_all()
             logger.info("Database tables created successfully")
             
-            # Verify tables exist
+            # Add uploaded_files column if it doesn't exist
             inspector = db.inspect(db.engine)
+            columns = [col['name'] for col in inspector.get_columns('test_scenario')]
+            if 'uploaded_files' not in columns:
+                with db.engine.connect() as conn:
+                    conn.execute(db.text('ALTER TABLE test_scenario ADD COLUMN uploaded_files TEXT'))
+                    logger.info("Added uploaded_files column to test_scenario table")
+            
+            # Verify tables exist
             tables = inspector.get_table_names()
             logger.info(f"Created tables: {', '.join(tables)}")
             

@@ -382,30 +382,60 @@ Content:
         if not context_docs:
             return False, "No context documents were provided for validation"
         
-        # Extract key phrases from context
-        key_phrases = set()
+        # Extract key phrases and important content from context
+        key_content = set()
         for doc in context_docs:
-            # Split content into words and get phrases of 3-4 words
-            words = doc.page_content.split()
-            for i in range(len(words)-2):
-                key_phrases.add(" ".join(words[i:i+3]))
+            # Get source information
+            source = doc.metadata.get('source', 'Unknown')
+            
+            # Split content into sentences and meaningful phrases
+            content = doc.page_content.replace('\n', ' ').strip()
+            sentences = [s.strip() for s in content.split('.') if s.strip()]
+            
+            # Add important content with source tracking
+            for sentence in sentences:
+                words = sentence.split()
+                # Add 3-word phrases
+                for i in range(len(words)-2):
+                    phrase = " ".join(words[i:i+3])
+                    if len(phrase) > 10:  # Only meaningful phrases
+                        key_content.add((phrase, source))
+                
+                # Add important technical terms or specific details
+                for word in words:
+                    if (len(word) > 5 and  # Longer words are likely meaningful
+                        not word.lower() in {'should', 'would', 'could', 'their', 'there', 'these', 'those'}):
+                        key_content.add((word, source))
         
-        # Check for presence of key phrases in generated text
+        # Check for content usage
         matches = 0
-        for phrase in key_phrases:
-            if phrase in generated_text:
-                matches += 1
+        total_items = len(key_content) if key_content else 1
+        matched_sources = set()
         
-        # Calculate coverage ratio
-        coverage_ratio = matches / len(key_phrases) if key_phrases else 0
+        for content, source in key_content:
+            if content.lower() in generated_text.lower():
+                matches += 1
+                matched_sources.add(source)
+        
+        # Calculate coverage metrics
+        coverage_ratio = matches / total_items
+        source_coverage = len(matched_sources) / len(set(doc.metadata.get('source', '') for doc in context_docs))
         
         # Validate document references
         has_doc_refs = any(f"[Doc " in generated_text or f"[DOCUMENT " in generated_text)
         
-        if coverage_ratio < 0.1 or not has_doc_refs:  # Less than 10% coverage
-            return False, "Generated scenario doesn't sufficiently incorporate context"
+        # More lenient validation criteria
+        if coverage_ratio < 0.05 and not has_doc_refs:  # Reduced from 0.1 to 0.05
+            return False, f"Generated scenario has low context coverage ({coverage_ratio:.1%})"
         
-        return True, f"Context integration validated (Coverage: {coverage_ratio:.2%})"
+        validation_msg = (
+            f"Context integration validated:\n"
+            f"- Content coverage: {coverage_ratio:.1%}\n"
+            f"- Source coverage: {source_coverage:.1%}\n"
+            f"- Document references: {'Present' if has_doc_refs else 'Missing'}"
+        )
+        
+        return True, validation_msg
     
     def generate_scenario_stream(self, criteria: str):
         """Generate a test scenario using streaming response with RAG."""

@@ -68,6 +68,7 @@ def init_routes(app):
             data = request.json
             name = data.get('name', '')
             criteria = data.get('criteria', '')
+            uploaded_files = data.get('uploaded_files', [])
             
             # Create new scenario
             scenario = TestScenario(
@@ -79,11 +80,11 @@ def init_routes(app):
             db.session.add(scenario)
             db.session.flush()  # Get scenario ID without committing
             
-            # Associate any uploaded documents with the scenario
-            document_ids = data.get('document_ids', [])
-            if document_ids:
-                documents = Document.query.filter(Document.id.in_(document_ids)).all()
+            # Get document IDs from filenames
+            if uploaded_files:
+                documents = Document.query.filter(Document.filename.in_(uploaded_files)).all()
                 scenario.documents.extend(documents)
+                logger.info(f"Found {len(documents)} documents for filenames: {uploaded_files}")
             
             # Initialize scenario-specific generator
             scenario_generator = EnhancedScenarioGenerator(scenario.id)
@@ -107,6 +108,8 @@ def init_routes(app):
                     if scenario_text.strip():
                         scenario.scenario = scenario_text
                         scenario.statistics = statistics
+                        # Add uploaded files to scenario metadata
+                        scenario.uploaded_files = ', '.join(uploaded_files) if uploaded_files else ''
                         db.session.commit()
                         logger.info(f"Successfully saved scenario with ID: {scenario.id}")
                 except Exception as e:
@@ -134,6 +137,7 @@ def init_routes(app):
                 'criteria': s.criteria,
                 'scenario': s.scenario,
                 'statistics': s.statistics,
+                'uploaded_files': s.uploaded_files,
                 'created_at': s.created_at.isoformat() if s.created_at else None,
                 'documents': [{
                     'id': doc.id,
@@ -162,6 +166,7 @@ def init_routes(app):
                 'criteria': scenario.criteria,
                 'scenario': scenario.scenario,
                 'statistics': scenario.statistics,
+                'uploaded_files': scenario.uploaded_files,
                 'created_at': scenario.created_at.isoformat() if scenario.created_at else None,
                 'documents': [{
                     'id': doc.id,
